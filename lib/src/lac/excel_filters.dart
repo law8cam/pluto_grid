@@ -72,9 +72,6 @@ class ExcelFilters {
   }
 
   List<int> containsFilter({required String filterValue, required List<int> filterIndex, String? column}) {
-    print('Contains Filter');
-    print(filterValue);
-    print(column);
 
     filterIndex.removeWhere((index) {
       String element = rows[index]!.cells[column]!.value.toString();

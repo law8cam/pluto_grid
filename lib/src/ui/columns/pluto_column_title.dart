@@ -408,7 +408,6 @@ abstract class __ColumnTextWidgetStateWithChange extends PlutoStateWithChange<_C
 class __ColumnTextWidgetState extends __ColumnTextWidgetStateWithChange {
   @override
   Widget build(BuildContext context) {
-    print("BUILD CALLED!!!!");
     return Text.rich(
       TextSpan(
         text: widget.column!.title,
