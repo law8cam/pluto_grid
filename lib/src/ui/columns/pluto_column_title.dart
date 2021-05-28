@@ -34,7 +34,7 @@ class _PlutoColumnTitleState extends _PlutoColumnTitleStateWithChange {
   void _showContextMenu(BuildContext context, Offset position) async {
     await showDialog<void>(
       context: context,
-      barrierDismissible: false,
+      barrierDismissible: true,
       builder: (context) => Dialog(
           child: ExcelMenu(
         context: context,
@@ -389,7 +389,7 @@ abstract class __ColumnTextWidgetStateWithChange extends PlutoStateWithChange<_C
   Future<void> handleOnPressedFilter() async {
     await showDialog<void>(
       context: context,
-      barrierDismissible: false,
+      barrierDismissible: true,
       builder: (context) => Dialog(
           child: ExcelMenu(
         context: context,

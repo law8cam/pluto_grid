@@ -103,6 +103,8 @@ class _ColumnFilteringScreenState extends State<ColumnFilteringScreen> {
           print(event);
         },
         configuration: PlutoGridConfiguration(
+
+          scrollbarConfig: const PlutoGridScrollbarConfig(isAlwaysShown: true, ),
           /// If columnFilterConfig is not set, the default setting is applied.
           ///
           /// Return the value returned by resolveDefaultColumnFilter through the resolver function.

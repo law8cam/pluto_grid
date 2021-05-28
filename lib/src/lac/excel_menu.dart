@@ -144,7 +144,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
       if (getUnix(isBefore: true) != 0) {
         filterIndex = excelFilters.dateFilter(filterValue: getUnix(isBefore: true), filterIndex: filterIndex, isBefore: true, column: currentColumn);
       }
-
     }
 
     if (columnType.isNumber) {
@@ -268,7 +267,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
   //   return filterIndex;
   // }
 
-
   int getUnix({bool isBefore = false}) {
     int dayUnix = 0;
     int hourUnix = 0;
@@ -278,16 +276,20 @@ class _ExcelMenuState extends State<ExcelMenu> {
     String hourString = isBefore ? beforeHourController.value.text : afterHourController.value.text;
     String minuteString = isBefore ? beforeMinController.value.text : afterMinController.value.text;
 
-    if (double.tryParse(dayString) != null) {
-      dayUnix = (double.parse(dayString) * 24 * 60 * 60 * 1000).toInt();
-    }
+    try {
+      if (double.tryParse(dayString) != null) {
+        dayUnix = (double.parse(dayString) * 24 * 60 * 60 * 1000).toInt();
+      }
 
-    if (double.tryParse(hourString) != null) {
-      hourUnix = (double.parse(hourString) * 60 * 60 * 1000).toInt();
-    }
+      if (double.tryParse(hourString) != null) {
+        hourUnix = (double.parse(hourString) * 60 * 60 * 1000).toInt();
+      }
 
-    if (double.tryParse(minuteString) != null) {
-      minuteUnix = (double.parse(minuteString) * 60 * 1000).toInt();
+      if (double.tryParse(minuteString) != null) {
+        minuteUnix = (double.parse(minuteString) * 60 * 1000).toInt();
+      }
+    }catch(e){
+      return 0;
     }
 
     int delta = dayUnix + hourUnix + minuteUnix;
@@ -358,7 +360,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
   }
 
   bool? getShowAllChecked() {
-
     print("Checked");
     print(checkedList.length);
     print("Available");
@@ -376,7 +377,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
     }
   }
 
-
   Map<String, Map<String, String>> saveFilter() {
     // Update only this column
 
@@ -387,9 +387,9 @@ class _ExcelMenuState extends State<ExcelMenu> {
       }
     });
 
-    if(saved.isNotEmpty) {
+    if (saved.isNotEmpty) {
       filterData[currentColumn] = saved;
-    }else{
+    } else {
       filterData.remove(currentColumn);
     }
 
@@ -397,7 +397,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
   }
 
   void saveAndClose() {
-
     Map<String, Map<String, String>> newData = saveFilter();
     widget.stateManager!.setFiltersNewColumns(newData.keys.toList());
     print("Filter Columns");
@@ -436,66 +435,127 @@ class _ExcelMenuState extends State<ExcelMenu> {
       filterRows();
     }
 
-    return SingleChildScrollView(
-      child: Shortcuts(
-        shortcuts: {
-          LogicalKeySet(LogicalKeyboardKey.enter): EnterIntent(),
-          LogicalKeySet(LogicalKeyboardKey.escape): EscapeIntent(),
-        },
-        child: Actions(
-          actions: {EnterIntent: CallbackAction<EnterIntent>(onInvoke: (intent) => saveAndClose()), EscapeIntent: CallbackAction<EscapeIntent>(onInvoke: (intent) => Navigator.of(context).pop())},
-          child: Focus(
-            autofocus: true,
-            child: Container(
-              width: 600,
-              height: 1000,
-              color: Colors.grey[100],
-              padding: const EdgeInsets.all(10),
-              // margin: EdgeInsets.all(5),
-              child: Column(
-                children: [
-                  InkWell(
-                    onTap: () {
-                      // if (widget.stateManager!.hasFilter) {
-                      setState(() {
-                        resetFilter();
-                        widget.stateManager!.setFiltersNew({});
-                        filterData = {};
-                        controllerMap.forEach((key, value) {
-                          value.text = '';
-                        });
-                      });
-                      // }
-                    },
-                    child: const ListTile(
-                      title: Text('Remove All Filters'),
-                      leading: Icon(Icons.filter_alt),
-                    ),
+    return Shortcuts(
+      shortcuts: {
+        LogicalKeySet(LogicalKeyboardKey.enter): EnterIntent(),
+        LogicalKeySet(LogicalKeyboardKey.escape): EscapeIntent(),
+      },
+      child: Actions(
+        actions: {EnterIntent: CallbackAction<EnterIntent>(onInvoke: (intent) => saveAndClose()), EscapeIntent: CallbackAction<EscapeIntent>(onInvoke: (intent) => Navigator.of(context).pop())},
+        child: Focus(
+          autofocus: true,
+          child: Container(
+            width: 600,
+            height: 1000,
+            color: Colors.grey[200],
+            padding: const EdgeInsets.all(12),
+            // margin: EdgeInsets.all(5),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.only(left: 18, right: 18),
+                  child: Column(
+                    children: [
+                      TextButton(
+                          onPressed: () { setState(() {
+                            resetFilter();
+                            widget.stateManager!.setFiltersNew({});
+                            filterData = {};
+                            controllerMap.forEach((key, value) {
+                              value.text = '';
+                            });
+                          });},
+                          child: Container(
+                            height: 50,
+                            child: Row(
+                              children: [
+                                const Icon(Icons.filter_alt, color: Colors.black54,),
+                                const SizedBox(
+                                  width: 20,
+                                ),
+                                const Text(
+                                  'Remove All Filters',
+                                  style: TextStyle(fontSize: 16, color: Colors.black),
+                                ),
+                              ],
+                            ),
+                          )),
+                      TextButton(
+                          onPressed: () {widget.stateManager!.hideColumn(widget.column!.key, true);
+                          Navigator.of(context).pop();},
+                          child: Container(
+                            height: 50,
+                            child: Row(
+                              children: [
+                                const Icon(Icons.hide_image, color: Colors.black54,),
+                                const SizedBox(
+                                  width: 20,
+                                ),
+                                const Text(
+                                  'Hide Column',
+                                  style: TextStyle(fontSize: 16, color: Colors.black),
+                                ),
+                              ],
+                            ),
+                          )),
+                      TextButton(
+                          onPressed: () {Navigator.of(context).pop();
+                          widget.stateManager!.showSetColumnsPopup(context);},
+                          child: Container(
+                            height: 50,
+                            child: Row(
+                              children: [
+                                const Icon(Icons.view_column_outlined, color: Colors.black54),
+                                const SizedBox(
+                                  width: 20,
+                                ),
+                                const Text(
+                                  'Set Columns',
+                                  style: TextStyle(fontSize: 16, color: Colors.black,),
+                                ),
+                              ],
+                            ),
+                          )),
+                      // TextButton(
+                      //     onPressed: () {
+                      //       setState(() {
+                      //         resetFilter();
+                      //         widget.stateManager!.setFiltersNew({});
+                      //         filterData = {};
+                      //         controllerMap.forEach((key, value) {
+                      //           value.text = '';
+                      //         });
+                      //       });
+                      //     },
+                      //     child: const ListTile(
+                      //       title: Text('Remove All Filters'),
+                      //       leading: Icon(Icons.filter_alt),
+                      //     )),
+                      // TextButton(
+                      //     onPressed: () {
+                      //       widget.stateManager!.hideColumn(widget.column!.key, true);
+                      //       Navigator.of(context).pop();
+                      //     },
+                      //     child: const ListTile(
+                      //       title: Text('Hide Column'),
+                      //       leading: Icon(Icons.hide_image),
+                      //     )),
+                      // TextButton(
+                      //     onPressed: () {
+                      //       Navigator.of(context).pop();
+                      //       widget.stateManager!.showSetColumnsPopup(context);
+                      //     },
+                      //     child: const ListTile(
+                      //       title: Text('Set Columns'),
+                      //       leading: Icon(Icons.view_column_outlined),
+                      //     )),
+                    ],
                   ),
-                  InkWell(
-                    onTap: () {
-                      widget.stateManager!.hideColumn(widget.column!.key, true);
-                      Navigator.of(context).pop();
-                    },
-                    child: const ListTile(
-                      title: Text('Hide Column'),
-                      leading: Icon(Icons.hide_image),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      widget.stateManager!.showSetColumnsPopup(context);
-                    },
-                    child: const ListTile(
-                      title: Text('Set Columns'),
-                      leading: Icon(Icons.view_column_outlined),
-                    ),
-                  ),
-                  Container(
-                    color: Colors.white,
-                    padding: const EdgeInsets.all(20),
-                    margin: const EdgeInsets.all(10),
+                ),
+                const Divider(),
+                Card(
+                  child: Container(
+                    padding: const EdgeInsets.only(left: 15, right: 15, bottom: 15),
                     child: Column(
                       children: [
                         TextField(
@@ -503,6 +563,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
                           focusNode: FocusNode(),
                           decoration: const InputDecoration(labelText: 'Contains'),
                           keyboardType: columnType.isNumber ? TextInputType.number : TextInputType.text,
+                          inputFormatters: columnType.isNumber ? [FilteringTextInputFormatter.allow(RegExp('[0-9.]'))] : null,
                           onEditingComplete: () {
                             mainFocusNode.requestFocus();
                           },
@@ -512,12 +573,15 @@ class _ExcelMenuState extends State<ExcelMenu> {
                             });
                           },
                         ),
-                        const SizedBox(height: 10),
+                        if (columnType.isNumber) const SizedBox(height: 10),
+                        
+                        // #,##0.00
                         if (columnType.isNumber)
                           TextField(
                             controller: greaterController,
                             decoration: const InputDecoration(labelText: 'Greater Than'),
                             keyboardType: TextInputType.number,
+                            inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[0-9.]'))],
                             onEditingComplete: () {
                               mainFocusNode.requestFocus();
                             },
@@ -527,12 +591,13 @@ class _ExcelMenuState extends State<ExcelMenu> {
                               });
                             },
                           ),
-                        const SizedBox(height: 10),
+                        if (columnType.isNumber) const SizedBox(height: 10),
                         if (columnType.isNumber)
                           TextField(
                             controller: lesserController,
                             decoration: const InputDecoration(labelText: 'Less Than'),
                             keyboardType: TextInputType.number,
+                            inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[0-9.]'))],
                             onEditingComplete: () {
                               mainFocusNode.requestFocus();
                             },
@@ -545,16 +610,24 @@ class _ExcelMenuState extends State<ExcelMenu> {
                         if (columnType.isDate)
                           Container(
                             // width: 500,
-                            // height: 300,
+                            height: 50,
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                const Text('Ending After'),
+                                Container(
+                                  width: 150,
+                                  child: const Text(
+                                    'Ending After',
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                ),
                                 Container(
                                   width: 100,
                                   child: TextField(
                                     controller: afterDayController,
                                     decoration: const InputDecoration(labelText: 'Days'),
+                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                     keyboardType: TextInputType.number,
                                     onEditingComplete: () {
                                       mainFocusNode.requestFocus();
@@ -572,6 +645,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
                                   child: TextField(
                                     controller: afterHourController,
                                     decoration: const InputDecoration(labelText: 'Hours'),
+                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                     keyboardType: TextInputType.number,
                                     onEditingComplete: () {
                                       mainFocusNode.requestFocus();
@@ -589,6 +663,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
                                   child: TextField(
                                     controller: afterMinController,
                                     decoration: const InputDecoration(labelText: 'Minutes'),
+                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                     keyboardType: TextInputType.number,
                                     onEditingComplete: () {
                                       mainFocusNode.requestFocus();
@@ -609,14 +684,22 @@ class _ExcelMenuState extends State<ExcelMenu> {
                             // width: 500,
                             // height: 300,
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                const Text('Ending Before'),
+                                Container(
+                                  width: 150,
+                                  child: const Text(
+                                    'Ending Before',
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                ),
                                 Container(
                                   width: 100,
                                   child: TextField(
                                     controller: beforeDayController,
                                     decoration: const InputDecoration(labelText: 'Days'),
+                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                     keyboardType: TextInputType.number,
                                     onEditingComplete: () {
                                       mainFocusNode.requestFocus();
@@ -634,6 +717,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
                                   child: TextField(
                                     controller: beforeHourController,
                                     decoration: const InputDecoration(labelText: 'Hours'),
+                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                     keyboardType: TextInputType.number,
                                     onEditingComplete: () {
                                       mainFocusNode.requestFocus();
@@ -651,6 +735,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
                                   child: TextField(
                                     controller: beforeMinController,
                                     decoration: const InputDecoration(labelText: 'Minutes'),
+                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                     keyboardType: TextInputType.number,
                                     onEditingComplete: () {
                                       mainFocusNode.requestFocus();
@@ -669,62 +754,93 @@ class _ExcelMenuState extends State<ExcelMenu> {
                       ],
                     ),
                   ),
-                  Container(
+                ),
+                const Divider(),
+                Card(
+                  child: Container(
                     margin: const EdgeInsets.all(10),
-                    height: 280,
+                    height: columnType.isText ? MediaQuery.of(context).size.height - 403 : MediaQuery.of(context).size.height - 531,
                     color: Colors.white,
-                    child: ListView.builder(
-                      itemCount: filterItems.length,
-                      itemBuilder: (context, index) => CheckboxListTile(
-                        tristate: filterItems[index] == 'Select All' ? true : false,
-                        title: Text(filterItems[index]),
-                        value: filterItems[index] == 'Select All' ? getShowAllChecked() : checkedList.contains(filterItems[index]),
-                        onChanged: (value) {
-                          var title = filterItems[index];
-                          if (title == 'Select All') {
-                            setState(() {
-                              // If Select All is in checkedLists
-                              // Clear check List
-                              if (checkedList.contains(title)) {
-                                // then set as true
-                                checkedList = [];
-                              } else {
-                                checkedList = [];
-                                checkedList.addAll(filterItems);
-                              }
-                            });
-                          } else {
-                            setState(() {
-                              print(value);
-                              checked[title] = value!;
-                              if (value && !checkedList.contains(title)) {
-                                checkedList.add(title);
-                              } else {
-                                checkedList.remove(title);
-                              }
-                            });
-                          }
-                        },
+                    child: Scrollbar(
+                      isAlwaysShown: true,
+                      showTrackOnHover: true,
+                      child: ListView.builder(
+                        itemCount: filterItems.length,
+                        itemBuilder: (context, index) => Container(
+                          width: 400,
+                          // height: 30,
+                          child: Column(
+                            children: [
+                              CheckboxListTile(
+                                tristate: filterItems[index] == 'Select All' ? true : false,
+                                title: Text(filterItems[index]),
+                                value: filterItems[index] == 'Select All' ? getShowAllChecked() : checkedList.contains(filterItems[index]),
+                                onChanged: (value) {
+                                  var title = filterItems[index];
+                                  if (title == 'Select All') {
+                                    setState(() {
+                                      // If Select All is in checkedLists
+                                      // Clear check List
+                                      if (checkedList.contains(title)) {
+                                        // then set as true
+                                        checkedList = [];
+                                      } else {
+                                        checkedList = [];
+                                        checkedList.addAll(filterItems);
+                                      }
+                                    });
+                                  } else {
+                                    setState(() {
+                                      print(value);
+                                      checked[title] = value!;
+                                      if (value && !checkedList.contains(title)) {
+                                        checkedList.add(title);
+                                      } else {
+                                        checkedList.remove(title);
+                                      }
+                                    });
+                                  }
+                                },
+                              ),
+                              const Divider(
+                                height: 1,
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text('Cancel')),
-                      ElevatedButton(
-                          onPressed: () {
-                            saveAndClose();
-                          },
-                          child: const Text('Done')),
-                    ],
-                  )
-                ],
-              ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Container(
+                            alignment: Alignment.center,
+                            width: 100,
+                            child: const Text(
+                              'Cancel',
+                              style: TextStyle(fontSize: 20),
+                            ))),
+                    ElevatedButton(
+                        onPressed: () {
+                          saveAndClose();
+                        },
+                        child: Container(
+                            alignment: Alignment.center,
+                            width: 100,
+                            child: const Text(
+                              'Done',
+                              style: TextStyle(fontSize: 20),
+                            ))),
+                  ],
+                )
+              ],
             ),
           ),
         ),
