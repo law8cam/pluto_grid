@@ -79,24 +79,19 @@ class _ExcelMenuState extends State<ExcelMenu> {
 
   /// Filter using the text input
   List<String> filterRows({bool reset = true}) {
-    print('Filter Rows');
 
     if (reset) {
       resetFilter();
     }
 
-    print('Filter Existing Stuff');
     // Apply other saved filters
     filterData.forEach((column, filterMap) {
-      print('Column: $column');
       // Use the text field to filter the current column
       if (column != currentColumn) {
         int beforeUnix = 0;
         int afterUnix = 0;
 
         filterMap.forEach((key, value) {
-          print('Key: $key');
-          print('Value: $value');
 
           if (key == 'Contains') {
             filterIndex = excelFilters.containsFilter(filterValue: value, filterIndex: filterIndex, column: column);
@@ -172,8 +167,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
     filterItems = filterItems.toSet().toList();
     filterItems.sort((a, b) => a.compareTo(b));
     fullCount = filterItems.length;
-
-    print(filterIndex);
 
     return filterItems;
   }
@@ -303,7 +296,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
   }
 
   void resetFilter({bool initial = false}) {
-    print('Reset Filter');
 
     filterItems = [];
 
@@ -319,7 +311,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
 
     // If initial then use visible rows to set checked items
     if (initial) {
-      print(widget.column!.type.toString());
 
       // Use visible rows to set if checked
       widget.stateManager!.rows.forEach((row) {
@@ -360,10 +351,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
   }
 
   bool? getShowAllChecked() {
-    print("Checked");
-    print(checkedList.length);
-    print("Available");
-    print(filterItems.length);
 
     if (checkedList.length == filterItems.length) {
       // All Selected
@@ -399,8 +386,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
   void saveAndClose() {
     Map<String, Map<String, String>> newData = saveFilter();
     widget.stateManager!.setFiltersNewColumns(newData.keys.toList());
-    print("Filter Columns");
-    print(widget.stateManager!.filtersNewColumns);
     // widget.stateManager!.resetCurrentState(notify: true);
     widget.stateManager!.resizeColumn(widget.stateManager!.columns[0].key, 0.00001);
 
@@ -421,7 +406,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    print(filterData);
     resetFilter(initial: true);
 
     // widget.stateManager.keyManager.
@@ -429,7 +413,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
 
   @override
   Widget build(BuildContext context) {
-    print('Build');
 
     if (filterItems.isEmpty) {
       filterRows();
@@ -791,7 +774,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
                                     });
                                   } else {
                                     setState(() {
-                                      print(value);
                                       checked[title] = value!;
                                       if (value && !checkedList.contains(title)) {
                                         checkedList.add(title);
