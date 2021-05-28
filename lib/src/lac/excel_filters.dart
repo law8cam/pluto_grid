@@ -1,11 +1,10 @@
 import '../../pluto_grid.dart';
 
-class ExcelFilters{
-
+class ExcelFilters {
   PlutoGridStateManager? stateManager;
   List<PlutoRow?> rows = [];
 
-  ExcelFilters({required this.stateManager}){
+  ExcelFilters({required this.stateManager}) {
     // rows = stateManager.rows;
     rows = stateManager!.refRows!.originalList;
   }
@@ -41,38 +40,38 @@ class ExcelFilters{
   }
 
   List<int> numberFilter({required String filterValue, required List<int> filterIndex, required bool isGreater, String? column}) {
+    if (double.tryParse(filterValue) != null) {
+      double number = double.parse(filterValue);
+      filterIndex.removeWhere((index) {
+        String element = rows[index]!.cells[column]!.value.toString();
 
-    double number = double.parse(filterValue);
-    filterIndex.removeWhere((index) {
-      String element = rows[index]!.cells[column]!.value.toString();
+        if (element == 'Select All') {
+          return false;
+        }
 
-      if (element == 'Select All') {
-        return false;
-      }
+        bool isRemove = true;
 
-      bool isRemove = true;
+        if (isGreater) {
+          isRemove = double.parse(element) < number;
+        } else {
+          isRemove = double.parse(element) > number;
+        }
 
-      if (isGreater) {
-        isRemove = double.parse(element) < number;
-      } else {
-        isRemove = double.parse(element) > number;
-      }
-
-      if (isRemove) {
-        // checkedList.remove(element);
-        return true;
-      } else {
-        // if (!checkedList.contains(element)) {
-        //   checkedList.add(element);
-        // }
-        return false;
-      }
-    });
+        if (isRemove) {
+          // checkedList.remove(element);
+          return true;
+        } else {
+          // if (!checkedList.contains(element)) {
+          //   checkedList.add(element);
+          // }
+          return false;
+        }
+      });
+    }
     return filterIndex;
   }
 
   List<int> containsFilter({required String filterValue, required List<int> filterIndex, String? column}) {
-
     print('Contains Filter');
     print(filterValue);
     print(column);
