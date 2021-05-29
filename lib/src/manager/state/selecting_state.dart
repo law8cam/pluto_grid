@@ -92,15 +92,9 @@ mixin SelectingState implements IPlutoGridState {
 
   void applyFiltersNew(Map<String, Map<String, String>> filterData){
 
-    print('Apply Filters Called');
-
     _filtersNew = filterData;
 
     List<int> filterIndex = [];
-
-    // eventManager!.stateManager!.columns[0].fil
-
-    // eventManager!.stateManager!.setShowColumnFilter(true);
 
 
     eventManager!.stateManager!.refRows!.originalList.forEach((row) {
@@ -110,22 +104,14 @@ mixin SelectingState implements IPlutoGridState {
     late ExcelFilters excelFilters = ExcelFilters(stateManager: eventManager!.stateManager);
     // filterIndex =
 
-    print("Row Count");
-    print(excelFilters.rows.length);
-
     filterData.forEach((column, filterMap) {
-      print('Column: $column');
       // Use the text field to filter the current column
         int beforeUnix = 0;
         int afterUnix = 0;
 
         filterMap.forEach((key, value) {
-          print('Key: $key');
-          print('Value: $value');
-
           if (key == 'Contains') {
             filterIndex = excelFilters.containsFilter(filterValue: value, filterIndex: filterIndex, column: column);
-            print(filterIndex);
           } else if (key == 'Greater') {
             filterIndex = excelFilters.numberFilter(filterValue: value, filterIndex: filterIndex, isGreater: true, column: column);
           } else if (key == 'Lesser') {
@@ -154,7 +140,11 @@ mixin SelectingState implements IPlutoGridState {
         }
     });
 
-    print(filterIndex);
+    // Set the columns which have filters
+    eventManager!.stateManager!.setFiltersNewColumns(filterData.keys.toList());
+    // Resize to trigger column filter icon
+    eventManager!.stateManager!.resizeColumn(eventManager!.stateManager!.columns[0].key, 0.00001);
+
     eventManager!.stateManager!.setFilter((element) {
       if (!filterIndex.contains(element!.sortIdx)) {
         return false;
@@ -162,9 +152,7 @@ mixin SelectingState implements IPlutoGridState {
         return true;
       }
     });
-
   }
-
 
   bool get isSelecting => _isSelecting;
 
