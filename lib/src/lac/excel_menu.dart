@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:pluto_grid/src/lac/excel_filters.dart';
 
 import '../../pluto_grid.dart';
+import 'excel_event.dart';
 
 class EnterIntent extends Intent {}
 
@@ -171,95 +172,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
     return filterItems;
   }
 
-  // List<int> dateFilter({required int filterValue, required List<int> filterIndex, required bool isBefore, String? column}) {
-  //   column ??= currentColumn;
-  //
-  //   filterIndex.removeWhere((index) {
-  //     String element = rows[index]!.cells[column]!.value.toString();
-  //     if (element == 'Select All') {
-  //       return false;
-  //     }
-  //
-  //     bool isRemove = true;
-  //
-  //     if (isBefore) {
-  //       isRemove = DateTime.parse(element).millisecondsSinceEpoch > filterValue;
-  //     } else {
-  //       isRemove = DateTime.parse(element).millisecondsSinceEpoch < filterValue;
-  //     }
-  //
-  //     if (isRemove) {
-  //       checkedList.remove(element);
-  //       return true;
-  //     } else {
-  //       if (!checkedList.contains(element)) {
-  //         checkedList.add(element);
-  //       }
-  //       return false;
-  //     }
-  //   });
-  //
-  //   return filterIndex;
-  // }
-  //
-  // List<int> numberFilter({required String filterValue, required List<int> filterIndex, required bool isGreater, String? column}) {
-  //   column ??= currentColumn;
-  //
-  //   double number = double.parse(filterValue);
-  //   filterIndex.removeWhere((index) {
-  //     String element = rows[index]!.cells[column]!.value.toString();
-  //
-  //     if (element == 'Select All') {
-  //       return false;
-  //     }
-  //
-  //     bool isRemove = true;
-  //
-  //     if (isGreater) {
-  //       isRemove = double.parse(element) < number;
-  //     } else {
-  //       isRemove = double.parse(element) > number;
-  //     }
-  //
-  //     if (isRemove) {
-  //       checkedList.remove(element);
-  //       return true;
-  //     } else {
-  //       if (!checkedList.contains(element)) {
-  //         checkedList.add(element);
-  //       }
-  //       return false;
-  //     }
-  //   });
-  //   return filterIndex;
-  // }
-  //
-  // List<int> containsFilter({required String filterValue, required List<int> filterIndex, String? column}) {
-  //   column ??= currentColumn;
-  //
-  //   print("Contains Filter");
-  //   print(filterValue);
-  //   print(column);
-  //
-  //   filterIndex.removeWhere((index) {
-  //     String element = rows[index]!.cells[column]!.value.toString();
-  //
-  //     if (element == 'Select All') {
-  //       return false;
-  //     }
-  //     if (!element.toLowerCase().contains(filterValue.toLowerCase())) {
-  //       checkedList.remove(element);
-  //       return true;
-  //     } else {
-  //       if (!checkedList.contains(element)) {
-  //         checkedList.add(element);
-  //       }
-  //       return false;
-  //     }
-  //   });
-  //   return filterIndex;
-  // }
-
   int getUnix({bool isBefore = false}) {
     int dayUnix = 0;
     int hourUnix = 0;
@@ -384,11 +296,14 @@ class _ExcelMenuState extends State<ExcelMenu> {
   }
 
   void saveAndClose() {
+
     Map<String, Map<String, String>> newData = saveFilter();
     widget.stateManager!.setFiltersNewColumns(newData.keys.toList());
-    // widget.stateManager!.resetCurrentState(notify: true);
+
+    // Resize to trigger column filter icon
     widget.stateManager!.resizeColumn(widget.stateManager!.columns[0].key, 0.00001);
 
+    // Apply filter to UI
     widget.stateManager!.setFilter((element) {
       if (!filterIndex.contains(element!.sortIdx)) {
         return false;
@@ -399,6 +314,12 @@ class _ExcelMenuState extends State<ExcelMenu> {
       }
     });
     widget.stateManager!.setFiltersNew(newData);
+
+    if(newData.isEmpty){
+      // Send data cleared event
+    }
+
+    widget.stateManager!.eventManager!.addEvent(ExcelSavedEvent());
     Navigator.of(context).pop();
   }
 
@@ -407,8 +328,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
     // TODO: implement initState
     super.initState();
     resetFilter(initial: true);
-
-    // widget.stateManager.keyManager.
   }
 
   @override
@@ -442,8 +361,12 @@ class _ExcelMenuState extends State<ExcelMenu> {
                       TextButton(
                           onPressed: () { setState(() {
                             resetFilter();
+
+                            // Clear filter data
                             widget.stateManager!.setFiltersNew({});
                             filterData = {};
+
+                            // Clear all text fields
                             controllerMap.forEach((key, value) {
                               value.text = '';
                             });
@@ -830,3 +753,5 @@ class _ExcelMenuState extends State<ExcelMenu> {
     );
   }
 }
+
+

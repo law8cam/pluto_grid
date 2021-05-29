@@ -98,6 +98,13 @@ class _ColumnFilteringScreenState extends State<ColumnFilteringScreen> {
         onLoaded: (PlutoGridOnLoadedEvent event) {
           // event.stateManager!.setShowColumnFilter(true);
           stateManager = event.stateManager!;
+
+          stateManager.eventManager!.listener((event) {
+
+            print('Event Listener');
+            print(event.toString());
+          });
+
         },
         onChanged: (PlutoGridOnChangedEvent event) {
           print(event);
