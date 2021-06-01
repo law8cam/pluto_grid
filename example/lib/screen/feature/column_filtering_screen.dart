@@ -84,25 +84,82 @@ class _ColumnFilteringScreenState extends State<ColumnFilteringScreen> {
           url:
               'https://github.com/bosskmk/pluto_grid/blob/master/example/lib/screen/feature/column_filtering_screen.dart',
         ),
+        const SizedBox(width: 50),
         ElevatedButton(onPressed: () {
 
           print("Tapped");
 
-          stateManager.applyFiltersNew({'text': {'Contains': 'bar'}});
+          // stateManager.applyColumnSortNew({'number': true});
 
-        }, child: const Text('Testing'))
+          // stateManager.applyFiltersNew({'text': {'Contains': 'bar'}});
+          // stateManager.resetCurrentState();
+          // stateManager.hideColumn(stateManager.refColumns!.originalList.firstWhere((element) => element.field == 'date').key, false);
+          // stateManager.showAllColumnsNew();
+
+          stateManager.applyColumnOrderNew(['text', 'select', 'number', 'date','disable']);
+
+          // Remove hidden Columns
+          // List<String> columnOrder = ['text', 'select', 'number', 'date','disable'];
+          // List<String> hiddenColumns = stateManager.getHiddenColumns();
+          // columnOrder.removeWhere((element) => hiddenColumns.contains(element));
+          //
+          // int index = 0;
+          // columnOrder.forEach((columnName) {
+          //   // remove/get column by name
+          //   // insert into index
+          //   int currentIndex = stateManager.refColumns!.indexWhere((element) => element.field == columnName);
+          //   PlutoColumn firstColumn = stateManager.refColumns!.removeAt(currentIndex);
+          //   stateManager.refColumns!.insert(index, firstColumn);
+          //   index++;
+          // });
+          //
+          // // stateManager.columns[0].
+          //
+          // // PlutoColumn firstColumn = stateManager.refColumns!.removeAt(0);
+          // // stateManager.refColumns!.insert(1, firstColumn);
+          // stateManager.updateCurrentCellPosition(notify: false);
+          // stateManager.notifyListeners();
+
+        }, child: const Text('Testing', style: TextStyle(fontSize: 30),))
       ],
       body: PlutoGrid(
         columns: columns,
         rows: rows,
         onLoaded: (PlutoGridOnLoadedEvent event) {
           // event.stateManager!.setShowColumnFilter(true);
+
           stateManager = event.stateManager!;
+          // stateManager.hideColumn(stateManager.columns.firstWhere((element) => element.field == 'date').key, true);
+
+          stateManager.hideColumnsNew(['date']);
+
+          stateManager.addListener(() {
+            print('State Listener');
+
+            print(stateManager.columns.map((e) => e.field).toList());
+
+            // print(stateManager.getColumnSortNew());
+
+            // if(stateManager.getSortedColumn != null) {
+            //   print(stateManager.getSortedColumn!.field);
+            //   print(stateManager.getSortedColumn!.sort.isAscending);
+            // }
+
+            // Hidden columns, compare original and latest, add deltas to list
+            // print('Latest');
+            // stateManager.columns.forEach((element) {
+            //   print(element.key);
+            // });
+            // print('Original');
+            // stateManager.refColumns!.originalList.forEach((element) {
+            //   print(element.key);
+            // });
+
+          });
 
           stateManager.eventManager!.listener((event) {
-
-            print('Event Listener');
-            print(event.toString());
+            // print('Event Listener');
+            // print(event.toString());
           });
 
         },
