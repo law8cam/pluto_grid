@@ -210,14 +210,20 @@ mixin SelectingState implements IPlutoGridState {
 
 
 
-  void hideColumnsNew(List<String> columns) {
+  void applyHideColumnsNew(List<String> columns) {
     columns.forEach((columnToHide) {
-      Key key = eventManager!
-          .stateManager!
-          .columns
-          .firstWhere((column) => column.field == columnToHide)
-          .key;
-      eventManager!.stateManager!.hideColumn(key, true);
+      //Column to hide not in column
+
+
+      if(!getHiddenColumns().contains(columnToHide)){
+        Key key = eventManager!
+            .stateManager!
+            .columns
+            .firstWhere((column) => column.field == columnToHide)
+            .key;
+
+        eventManager!.stateManager!.hideColumn(key, true);
+      }
     });
   }
 
