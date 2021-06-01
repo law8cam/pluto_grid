@@ -175,6 +175,22 @@ mixin SelectingState implements IPlutoGridState {
     }
   }
 
+  void applyColumnSortNew(Map<String, bool> sortData) {
+    sortData.forEach((columnToSort, isAscending) {
+      PlutoColumn column = eventManager!.stateManager!.refColumns!.originalList.firstWhere((column) => column.field == columnToSort);
+      if (isAscending) {
+        eventManager!.stateManager!.sortAscending(column);
+      } else {
+        eventManager!.stateManager!.sortDescending(column);
+      }
+      eventManager!.stateManager!.notifyListeners();
+    });
+  }
+
+  List<String> getColumnOrderNew(){
+    return eventManager!.stateManager!.columns.map((e) => e.field).toList();
+  }
+
   void applyColumnOrderNew(List<String> columnOrder){
     // Remove hidden Columns
     // List<String> columnOrder = ['text', 'select', 'number', 'date','disable'];
@@ -192,17 +208,7 @@ mixin SelectingState implements IPlutoGridState {
     eventManager!.stateManager!.notifyListeners();
   }
 
-  void applyColumnSortNew(Map<String, bool> sortData) {
-    sortData.forEach((columnToSort, isAscending) {
-      PlutoColumn column = eventManager!.stateManager!.refColumns!.originalList.firstWhere((column) => column.field == columnToSort);
-      if (isAscending) {
-        eventManager!.stateManager!.sortAscending(column);
-      } else {
-        eventManager!.stateManager!.sortDescending(column);
-      }
-      eventManager!.stateManager!.notifyListeners();
-    });
-  }
+
 
   void hideColumnsNew(List<String> columns) {
     columns.forEach((columnToHide) {
