@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
@@ -32,7 +35,11 @@ class _ColumnFilteringScreenState extends State<ColumnFilteringScreen> {
       PlutoColumn(
         title: 'Number',
         field: 'number',
-        type: PlutoColumnType.number(),
+        type: PlutoColumnType.number(format: '#,###.##'),
+        // formatter: (value) => value,
+        formatter: (dynamic v) {
+          return '£${double.parse(v.toString()).toStringAsFixed(2)}';
+        },
       ),
       PlutoColumn(
         title: 'Date',
@@ -85,40 +92,16 @@ class _ColumnFilteringScreenState extends State<ColumnFilteringScreen> {
               'https://github.com/bosskmk/pluto_grid/blob/master/example/lib/screen/feature/column_filtering_screen.dart',
         ),
         const SizedBox(width: 50),
+        TextField(onChanged: (value) {setState(() {
+
+        });},),
+        const SizedBox(width: 50),
+
         ElevatedButton(onPressed: () {
 
-          print("Tapped");
+          List<String> selected = ['Amber', "Antonio's Pizza", '21 Club', '241 Pizza', 'BOOF'];
 
-          // stateManager.applyColumnSortNew({'number': true});
-
-          // stateManager.applyFiltersNew({'text': {'Contains': 'bar'}});
-          // stateManager.resetCurrentState();
-          // stateManager.hideColumn(stateManager.refColumns!.originalList.firstWhere((element) => element.field == 'date').key, false);
-          // stateManager.showAllColumnsNew();
-
-          stateManager.applyColumnOrderNew(['text', 'select', 'number', 'date','disable']);
-
-          // Remove hidden Columns
-          // List<String> columnOrder = ['text', 'select', 'number', 'date','disable'];
-          // List<String> hiddenColumns = stateManager.getHiddenColumns();
-          // columnOrder.removeWhere((element) => hiddenColumns.contains(element));
-          //
-          // int index = 0;
-          // columnOrder.forEach((columnName) {
-          //   // remove/get column by name
-          //   // insert into index
-          //   int currentIndex = stateManager.refColumns!.indexWhere((element) => element.field == columnName);
-          //   PlutoColumn firstColumn = stateManager.refColumns!.removeAt(currentIndex);
-          //   stateManager.refColumns!.insert(index, firstColumn);
-          //   index++;
-          // });
-          //
-          // // stateManager.columns[0].
-          //
-          // // PlutoColumn firstColumn = stateManager.refColumns!.removeAt(0);
-          // // stateManager.refColumns!.insert(1, firstColumn);
-          // stateManager.updateCurrentCellPosition(notify: false);
-          // stateManager.notifyListeners();
+          stateManager.applyFiltersNew({'text': {'Selected': jsonEncode(selected)}});
 
         }, child: const Text('Testing', style: TextStyle(fontSize: 30),))
       ],
@@ -126,40 +109,14 @@ class _ColumnFilteringScreenState extends State<ColumnFilteringScreen> {
         columns: columns,
         rows: rows,
         onLoaded: (PlutoGridOnLoadedEvent event) {
-          // event.stateManager!.setShowColumnFilter(true);
 
           stateManager = event.stateManager!;
-          // stateManager.hideColumn(stateManager.columns.firstWhere((element) => element.field == 'date').key, true);
-
-          stateManager.hideColumnsNew(['date']);
-
           stateManager.addListener(() {
-            print('State Listener');
-
-            print(stateManager.columns.map((e) => e.field).toList());
-
-            // print(stateManager.getColumnSortNew());
-
-            // if(stateManager.getSortedColumn != null) {
-            //   print(stateManager.getSortedColumn!.field);
-            //   print(stateManager.getSortedColumn!.sort.isAscending);
-            // }
-
-            // Hidden columns, compare original and latest, add deltas to list
-            // print('Latest');
-            // stateManager.columns.forEach((element) {
-            //   print(element.key);
-            // });
-            // print('Original');
-            // stateManager.refColumns!.originalList.forEach((element) {
-            //   print(element.key);
-            // });
-
+            // print('State Listener');
           });
 
           stateManager.eventManager!.listener((event) {
             // print('Event Listener');
-            // print(event.toString());
           });
 
         },
