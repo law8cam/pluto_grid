@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pluto_grid/src/lac/excel_filters.dart';
@@ -80,7 +82,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
 
   /// Filter using the text input
   List<String> filterRows({bool reset = true}) {
-
     if (reset) {
       resetFilter();
     }
@@ -93,7 +94,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
         int afterUnix = 0;
 
         filterMap.forEach((key, value) {
-
           if (key == 'Contains') {
             filterIndex = excelFilters.containsFilter(filterValue: value, filterIndex: filterIndex, column: column);
           } else if (key == 'Greater') {
@@ -126,9 +126,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
     });
 
     // Filter using text fields
-
     if (containsController.value.text.isNotEmpty) {
-      // filterIndex = containsFilter(filterValue: containsController.value.text, filterIndex: filterIndex);
       filterIndex = excelFilters.containsFilter(filterValue: containsController.value.text, filterIndex: filterIndex, column: currentColumn);
     }
 
@@ -166,7 +164,15 @@ class _ExcelMenuState extends State<ExcelMenu> {
     });
 
     filterItems = filterItems.toSet().toList();
-    filterItems.sort((a, b) => a.compareTo(b));
+    // filterItems.sort((a, b) => a.compareTo(b));
+    if (columnType.isNumber) {
+      filterItems.sort((a, b) => double.parse(a).compareTo(double.parse(b)));
+    } else {
+      filterItems.sort((a, b) => a.compareTo(b));
+    }
+
+    filterItems.insert(0, 'Select All');
+
     fullCount = filterItems.length;
 
     return filterItems;
@@ -193,7 +199,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
       if (double.tryParse(minuteString) != null) {
         minuteUnix = (double.parse(minuteString) * 60 * 1000).toInt();
       }
-    }catch(e){
+    } catch (e) {
       return 0;
     }
 
@@ -208,7 +214,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
   }
 
   void resetFilter({bool initial = false}) {
-
     filterItems = [];
 
     // Populate with the original/full list
@@ -218,16 +223,22 @@ class _ExcelMenuState extends State<ExcelMenu> {
     });
 
     filterItems = filterItems.toSet().toList();
-    filterItems.sort((a, b) => a.compareTo(b));
+
+    if (columnType.isNumber) {
+      filterItems.sort((a, b) => double.parse(a).compareTo(double.parse(b)));
+    } else {
+      filterItems.sort((a, b) => a.compareTo(b));
+    }
+
     fullCount = filterItems.length;
 
     // If initial then use visible rows to set checked items
     if (initial) {
-
       // Use visible rows to set if checked
       widget.stateManager!.rows.forEach((row) {
         checkedList.add(row!.cells[currentColumn]!.value.toString());
       });
+      print(checkedList);
       checkedList = checkedList.toSet().toList();
 
       // Apply all filters
@@ -239,12 +250,15 @@ class _ExcelMenuState extends State<ExcelMenu> {
 
         // Add data to inputs
         filters!.forEach((key, value) {
-          controllerMap[key]!.text = value;
+          if(key != 'Selected') {
+            controllerMap[key]!.text = value;
+          }
         });
 
         // Filter the rows, to apply other rows or previous filtering
         // This is loosing the un-checked items
       }
+
       filterRows(reset: false);
     } else {
       // if not initial then check all items
@@ -263,11 +277,10 @@ class _ExcelMenuState extends State<ExcelMenu> {
   }
 
   bool? getShowAllChecked() {
-
     if (checkedList.length == filterItems.length) {
       // All Selected
       return true;
-    } else if (checkedList.isEmpty || checkedList.length == 1) {
+    } else if (checkedList.isEmpty) {
       // Non Selected
       return false;
     } else {
@@ -286,17 +299,23 @@ class _ExcelMenuState extends State<ExcelMenu> {
       }
     });
 
+    // Selected
+    if (getShowAllChecked() == null) {
+      saved['Selected'] = jsonEncode(checkedList);
+    }
+
     if (saved.isNotEmpty) {
       filterData[currentColumn] = saved;
     } else {
       filterData.remove(currentColumn);
     }
 
+    print(filterData);
+
     return filterData;
   }
 
   void saveAndClose() {
-
     Map<String, Map<String, String>> newData = saveFilter();
     widget.stateManager!.setFiltersNewColumns(newData.keys.toList());
 
@@ -315,7 +334,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
     });
     widget.stateManager!.setFiltersNew(newData);
 
-    if(newData.isEmpty){
+    if (newData.isEmpty) {
       // Send data cleared event
     }
 
@@ -332,7 +351,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
 
   @override
   Widget build(BuildContext context) {
-
     if (filterItems.isEmpty) {
       filterRows();
     }
@@ -359,23 +377,28 @@ class _ExcelMenuState extends State<ExcelMenu> {
                   child: Column(
                     children: [
                       TextButton(
-                          onPressed: () { setState(() {
-                            resetFilter();
+                          onPressed: () {
+                            setState(() {
+                              resetFilter();
 
-                            // Clear filter data
-                            widget.stateManager!.setFiltersNew({});
-                            filterData = {};
+                              // Clear filter data
+                              widget.stateManager!.setFiltersNew({});
+                              filterData = {};
 
-                            // Clear all text fields
-                            controllerMap.forEach((key, value) {
-                              value.text = '';
+                              // Clear all text fields
+                              controllerMap.forEach((key, value) {
+                                value.text = '';
+                              });
                             });
-                          });},
+                          },
                           child: Container(
                             height: 50,
                             child: Row(
                               children: [
-                                const Icon(Icons.filter_alt, color: Colors.black54,),
+                                const Icon(
+                                  Icons.filter_alt,
+                                  color: Colors.black54,
+                                ),
                                 const SizedBox(
                                   width: 20,
                                 ),
@@ -387,13 +410,18 @@ class _ExcelMenuState extends State<ExcelMenu> {
                             ),
                           )),
                       TextButton(
-                          onPressed: () {widget.stateManager!.hideColumn(widget.column!.key, true);
-                          Navigator.of(context).pop();},
+                          onPressed: () {
+                            widget.stateManager!.hideColumn(widget.column!.key, true);
+                            Navigator.of(context).pop();
+                          },
                           child: Container(
                             height: 50,
                             child: Row(
                               children: [
-                                const Icon(Icons.hide_image, color: Colors.black54,),
+                                const Icon(
+                                  Icons.hide_image,
+                                  color: Colors.black54,
+                                ),
                                 const SizedBox(
                                   width: 20,
                                 ),
@@ -405,8 +433,10 @@ class _ExcelMenuState extends State<ExcelMenu> {
                             ),
                           )),
                       TextButton(
-                          onPressed: () {Navigator.of(context).pop();
-                          widget.stateManager!.showSetColumnsPopup(context);},
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            widget.stateManager!.showSetColumnsPopup(context);
+                          },
                           child: Container(
                             height: 50,
                             child: Row(
@@ -417,44 +447,14 @@ class _ExcelMenuState extends State<ExcelMenu> {
                                 ),
                                 const Text(
                                   'Set Columns',
-                                  style: TextStyle(fontSize: 16, color: Colors.black,),
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black,
+                                  ),
                                 ),
                               ],
                             ),
                           )),
-                      // TextButton(
-                      //     onPressed: () {
-                      //       setState(() {
-                      //         resetFilter();
-                      //         widget.stateManager!.setFiltersNew({});
-                      //         filterData = {};
-                      //         controllerMap.forEach((key, value) {
-                      //           value.text = '';
-                      //         });
-                      //       });
-                      //     },
-                      //     child: const ListTile(
-                      //       title: Text('Remove All Filters'),
-                      //       leading: Icon(Icons.filter_alt),
-                      //     )),
-                      // TextButton(
-                      //     onPressed: () {
-                      //       widget.stateManager!.hideColumn(widget.column!.key, true);
-                      //       Navigator.of(context).pop();
-                      //     },
-                      //     child: const ListTile(
-                      //       title: Text('Hide Column'),
-                      //       leading: Icon(Icons.hide_image),
-                      //     )),
-                      // TextButton(
-                      //     onPressed: () {
-                      //       Navigator.of(context).pop();
-                      //       widget.stateManager!.showSetColumnsPopup(context);
-                      //     },
-                      //     child: const ListTile(
-                      //       title: Text('Set Columns'),
-                      //       leading: Icon(Icons.view_column_outlined),
-                      //     )),
                     ],
                   ),
                 ),
@@ -466,7 +466,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
                       children: [
                         TextField(
                           controller: containsController,
-                          focusNode: FocusNode(),
                           decoration: const InputDecoration(labelText: 'Contains'),
                           keyboardType: columnType.isNumber ? TextInputType.number : TextInputType.text,
                           inputFormatters: columnType.isNumber ? [FilteringTextInputFormatter.allow(RegExp('[0-9.]'))] : null,
@@ -480,7 +479,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
                           },
                         ),
                         if (columnType.isNumber) const SizedBox(height: 10),
-                        
+
                         // #,##0.00
                         if (columnType.isNumber)
                           TextField(
@@ -665,7 +664,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
                 Card(
                   child: Container(
                     margin: const EdgeInsets.all(10),
-                    height: columnType.isText ? MediaQuery.of(context).size.height - 403 : MediaQuery.of(context).size.height - 531,
+                    height: columnType.isText ? MediaQuery.of(context).size.height - 426 : MediaQuery.of(context).size.height - 554,
                     color: Colors.white,
                     child: Scrollbar(
                       isAlwaysShown: true,
@@ -679,7 +678,8 @@ class _ExcelMenuState extends State<ExcelMenu> {
                             children: [
                               CheckboxListTile(
                                 tristate: filterItems[index] == 'Select All' ? true : false,
-                                title: Text(filterItems[index]),
+                                // title: Text(filterItems[index]),
+                                title: Text(filterItems[index] == 'Select All' ? 'Select All' : widget.column!.formattedValueForDisplay(filterItems[index])),
                                 value: filterItems[index] == 'Select All' ? getShowAllChecked() : checkedList.contains(filterItems[index]),
                                 onChanged: (value) {
                                   var title = filterItems[index];
@@ -753,5 +753,3 @@ class _ExcelMenuState extends State<ExcelMenu> {
     );
   }
 }
-
-
