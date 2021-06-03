@@ -77,6 +77,7 @@ class _ColumnFilteringScreenState extends State<ColumnFilteringScreen> {
         title: 'Select',
         field: 'select',
         type: PlutoColumnType.select(<String>['A', 'B', 'C', 'D', 'E', 'F']),
+        allItems: ['Red', 'Blue', 'Green'],
       ),
     ];
 

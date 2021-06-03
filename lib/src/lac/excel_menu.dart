@@ -38,6 +38,8 @@ class _ExcelMenuState extends State<ExcelMenu> {
 
   late List<PlutoRow?> rows = widget.stateManager!.refRows!.originalList;
 
+  bool displayAll = false;
+
   TextEditingController containsController = TextEditingController();
   TextEditingController greaterController = TextEditingController();
   TextEditingController lesserController = TextEditingController();
@@ -97,67 +99,71 @@ class _ExcelMenuState extends State<ExcelMenu> {
   }
 
   /// Filter using the text input
-  List<String> filterRows({bool reset = true}) {
+  List<String> filterRows({bool reset = true, bool initial = false}) {
+
+    // Why doing this?
     if (reset) {
-      resetFilter();
+      resetFilter(initial: initial);
     }
 
-    // Apply other saved filters
-    filterData.forEach((column, filterMap) {
-      // Use the text field to filter the current column
-      if (column != currentColumn) {
-        int beforeUnix = 0;
-        int afterUnix = 0;
+    if(!displayAll) {
+      // Apply other saved filters
+      filterData.forEach((column, filterMap) {
+        // Use the text field to filter the current column
+        if (column != currentColumn) {
+          int beforeUnix = 0;
+          int afterUnix = 0;
 
-        filterMap.forEach((key, value) {
-          if (key == 'Contains') {
-            filterIndex = excelFilters.containsFilter(filterValue: value, filterIndex: filterIndex, column: column);
-          } else if (key == 'Greater') {
-            filterIndex = excelFilters.numberFilter(filterValue: value, filterIndex: filterIndex, isGreater: true, column: column);
-          } else if (key == 'Lesser') {
-            filterIndex = excelFilters.numberFilter(filterValue: value, filterIndex: filterIndex, isGreater: false, column: column);
-          } else if (key == 'BeforeMin') {
-            beforeUnix += (double.parse(value) * 60 * 1000).toInt();
-          } else if (key == 'BeforeHour') {
-            beforeUnix += (double.parse(value) * 60 * 60 * 1000).toInt();
-          } else if (key == 'BeforeDay') {
-            beforeUnix += (double.parse(value) * 24 * 60 * 60 * 1000).toInt();
-          } else if (key == 'AfterMin') {
-            afterUnix += (double.parse(value) * 60 * 1000).toInt();
-          } else if (key == 'AfterHour') {
-            afterUnix += (double.parse(value) * 60 * 60 * 1000).toInt();
-          } else if (key == 'AfterDay') {
-            afterUnix += (double.parse(value) * 24 * 60 * 60 * 1000).toInt();
-          } else if (key == 'Selected') {
-            List<String> stringList = [];
-            jsonDecode(value).forEach((dynamic element) {
-              stringList.add(element.toString());
-            });
-            filterIndex = excelFilters.equalsFilter(filterList: stringList, filterIndex: filterIndex, column: column);
+          filterMap.forEach((key, value) {
+            if (key == 'Contains') {
+              filterIndex = excelFilters.containsFilter(filterValue: value, filterIndex: filterIndex, column: column);
+            } else if (key == 'Greater') {
+              filterIndex = excelFilters.numberFilter(filterValue: value, filterIndex: filterIndex, isGreater: true, column: column);
+            } else if (key == 'Lesser') {
+              filterIndex = excelFilters.numberFilter(filterValue: value, filterIndex: filterIndex, isGreater: false, column: column);
+            } else if (key == 'BeforeMin') {
+              beforeUnix += (double.parse(value) * 60 * 1000).toInt();
+            } else if (key == 'BeforeHour') {
+              beforeUnix += (double.parse(value) * 60 * 60 * 1000).toInt();
+            } else if (key == 'BeforeDay') {
+              beforeUnix += (double.parse(value) * 24 * 60 * 60 * 1000).toInt();
+            } else if (key == 'AfterMin') {
+              afterUnix += (double.parse(value) * 60 * 1000).toInt();
+            } else if (key == 'AfterHour') {
+              afterUnix += (double.parse(value) * 60 * 60 * 1000).toInt();
+            } else if (key == 'AfterDay') {
+              afterUnix += (double.parse(value) * 24 * 60 * 60 * 1000).toInt();
+            } else if (key == 'Selected') {
+              List<String> stringList = [];
+              jsonDecode(value).forEach((dynamic element) {
+                stringList.add(element.toString());
+              });
+              filterIndex = excelFilters.equalsFilter(filterList: stringList, filterIndex: filterIndex, column: column);
+            }
+          });
+
+          if (beforeUnix != 0) {
+            filterIndex = excelFilters.dateFilter(
+              filterValue: beforeUnix,
+              filterIndex: filterIndex,
+              isBefore: true,
+              isFuture: isStart ? false : true,
+              column: column,
+            );
           }
-        });
 
-        if (beforeUnix != 0) {
-          filterIndex = excelFilters.dateFilter(
-            filterValue: beforeUnix,
-            filterIndex: filterIndex,
-            isBefore: true,
-            isFuture: isStart ? false : true,
-            column: column,
-          );
+          if (afterUnix != 0) {
+            filterIndex = excelFilters.dateFilter(
+              filterValue: afterUnix,
+              filterIndex: filterIndex,
+              isBefore: false,
+              isFuture: isStart ? false : true,
+              column: column,
+            );
+          }
         }
-
-        if (afterUnix != 0) {
-          filterIndex = excelFilters.dateFilter(
-            filterValue: afterUnix,
-            filterIndex: filterIndex,
-            isBefore: false,
-            isFuture: isStart ? false : true,
-            column: column,
-          );
-        }
-      }
-    });
+      });
+    }
 
     // Filter using text fields
     if (containsController.value.text.isNotEmpty) {
@@ -209,14 +215,13 @@ class _ExcelMenuState extends State<ExcelMenu> {
       filterItems.add(rows[index]!.cells[currentColumn]!.value.toString());
     });
 
+    if(displayAll && widget.column!.allItems.isNotEmpty) {
+      var additionalItems = excelFilters.containsFilterString(filterValue: containsController.value.text, itemsToFilter: []..addAll(widget.column!.allItems), column: currentColumn);
+      filterItems.addAll(additionalItems);
+    }
+
     filterItems = filterItems.toSet().toList();
     filterItems = sortList(filterItems);
-
-    // if (columnType.isNumber) {
-    //   filterItems.sort((a, b) => double.parse(a).compareTo(double.parse(b)));
-    // } else {
-    //   filterItems.sort((a, b) => a.compareTo(b));
-    // }
 
     filterItems.insert(0, 'Select All');
 
@@ -290,12 +295,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
     filterItems = filterItems.toSet().toList();
     filterItems = sortList(filterItems);
 
-    // if (columnType.isNumber) {
-    //   filterItems.sort((a, b) => double.parse(a).compareTo(double.parse(b)));
-    // } else {
-    //   filterItems.sort((a, b) => a.compareTo(b));
-    // }
-
     fullCount = filterItems.length;
 
     // If initial then use visible rows to set checked items
@@ -308,13 +307,13 @@ class _ExcelMenuState extends State<ExcelMenu> {
       checkedList = checkedList.toSet().toList();
 
       // Apply all filters
-      filterData.forEach((column, value) {});
+      // filterData.forEach((column, value) {});
 
-      // Apply past filters
-      if (filterData.containsKey(currentColumn)) {
+      // Apply other column filters
+      if (filterData.containsKey(currentColumn) && !displayAll) {
         Map<String, String>? filters = filterData[currentColumn];
 
-        // Add data to inputs
+        // Add filter data to text fields
         filters!.forEach((key, value) {
           if (key != 'Selected') {
             controllerMap[key]!.text = value;
@@ -328,6 +327,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
       filterRows(reset: false);
     } else {
       // if not initial then check all items
+      // this is when contains is undone
       checkedList = [];
       checkedList.addAll(filterItems);
     }
@@ -439,40 +439,61 @@ class _ExcelMenuState extends State<ExcelMenu> {
                 Container(
                   padding: const EdgeInsets.only(left: 18, right: 18),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      TextButton(
-                          onPressed: () {
-                            setState(() {
-                              resetFilter();
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  resetFilter();
+                                  // Clear filter data
+                                  widget.stateManager!.setFiltersNew({});
+                                  filterData = {};
 
-                              // Clear filter data
-                              widget.stateManager!.setFiltersNew({});
-                              filterData = {};
+                                  // Clear all text fields
+                                  controllerMap.forEach((key, value) {
+                                    value.text = '';
+                                  });
+                                });
+                              },
+                              child: Container(
+                                height: 50,
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.filter_alt,
+                                      color: Colors.black54,
+                                    ),
+                                    const SizedBox(
+                                      width: 20,
+                                    ),
+                                    const Text(
+                                      'Remove All Filters',
+                                      style: TextStyle(fontSize: 16, color: Colors.black),
+                                    ),
+                                  ],
+                                ),
+                              )),
 
-                              // Clear all text fields
-                              controllerMap.forEach((key, value) {
-                                value.text = '';
-                              });
-                            });
-                          },
-                          child: Container(
-                            height: 50,
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.filter_alt,
-                                  color: Colors.black54,
-                                ),
-                                const SizedBox(
-                                  width: 20,
-                                ),
-                                const Text(
-                                  'Remove All Filters',
-                                  style: TextStyle(fontSize: 16, color: Colors.black),
-                                ),
-                              ],
+                          // if(widget.column.)
+                          Container(
+                            width: 200,
+                            child: CheckboxListTile(
+                              tristate: false,
+                              title: const Text('Display All'),
+                              value: displayAll,
+                              onChanged: (value) {
+                                setState(() {
+                                  displayAll = value!;
+                                  filterRows(initial: true);
+                                });
+                              },
                             ),
-                          )),
+                          ),
+                        ],
+                      ),
                       TextButton(
                           onPressed: () {
                             widget.stateManager!.hideColumn(widget.column!.key, true);
@@ -519,6 +540,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
                               ],
                             ),
                           )),
+
                     ],
                   ),
                 ),
@@ -757,7 +779,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
                 Card(
                   child: Container(
                     margin: const EdgeInsets.all(10),
-                    height: columnType.isText ? MediaQuery.of(context).size.height - 426 : MediaQuery.of(context).size.height - 554,
+                    height: columnType.isText ? MediaQuery.of(context).size.height - 446 : MediaQuery.of(context).size.height - 574,
                     color: Colors.white,
                     child: Scrollbar(
                       isAlwaysShown: true,
@@ -826,14 +848,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
                               style: TextStyle(fontSize: 20),
                             ))),
                     Text('${resultCount()} items'),
-                    // Container(
-                    //   width: 200,
-                    //   child: CheckboxListTile(
-                    //     title: const Text('Show All'),
-                    //     value: true,
-                    //     onChanged: (value) {},
-                    //   ),
-                    // ),
+
                     ElevatedButton(
                         onPressed: () {
                           saveAndClose();
