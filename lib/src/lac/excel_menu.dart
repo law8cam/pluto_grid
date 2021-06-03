@@ -55,6 +55,10 @@ class _ExcelMenuState extends State<ExcelMenu> {
   // Map<String, dynamic> filterData = <String, dynamic> {'Text': {'Contains': 'Baik'}};
 
   late String currentColumn = widget.column!.field;
+  late bool isStart = currentColumn.toLowerCase().contains('start');
+
+  int beforeUnix = 0;
+  int afterUnix = 0;
 
   late Map<String, TextEditingController> controllerMap = {
     'Contains': containsController,
@@ -78,7 +82,19 @@ class _ExcelMenuState extends State<ExcelMenu> {
   var filter = '';
   int fullCount = 0;
 
-  int isAfter = 0;
+  List<String> sortList(List<String> listToSort) {
+    if (columnType.isNumber) {
+      listToSort.sort((a, b) => double.parse(a).compareTo(double.parse(b)));
+    } else if (columnType.isDate) {
+      // listToSort.sort((a, b) => DateTime.parse(a).compareTo(DateTime.parse(a)));
+      listToSort.sort((a, b) {
+        return DateTime.parse(a).compareTo(DateTime.parse(b));
+      });
+    } else {
+      listToSort.sort((a, b) => a.compareTo(b));
+    }
+    return listToSort;
+  }
 
   /// Filter using the text input
   List<String> filterRows({bool reset = true}) {
@@ -112,15 +128,33 @@ class _ExcelMenuState extends State<ExcelMenu> {
             afterUnix += (double.parse(value) * 60 * 60 * 1000).toInt();
           } else if (key == 'AfterDay') {
             afterUnix += (double.parse(value) * 24 * 60 * 60 * 1000).toInt();
+          } else if (key == 'Selected') {
+            List<String> stringList = [];
+            jsonDecode(value).forEach((dynamic element) {
+              stringList.add(element.toString());
+            });
+            filterIndex = excelFilters.equalsFilter(filterList: stringList, filterIndex: filterIndex, column: column);
           }
         });
 
         if (beforeUnix != 0) {
-          filterIndex = excelFilters.dateFilter(filterValue: beforeUnix + DateTime.now().millisecondsSinceEpoch, filterIndex: filterIndex, isBefore: true, column: column);
+          filterIndex = excelFilters.dateFilter(
+            filterValue: beforeUnix,
+            filterIndex: filterIndex,
+            isBefore: true,
+            isFuture: isStart ? false : true,
+            column: column,
+          );
         }
 
         if (afterUnix != 0) {
-          filterIndex = excelFilters.dateFilter(filterValue: afterUnix + DateTime.now().millisecondsSinceEpoch, filterIndex: filterIndex, isBefore: false, column: column);
+          filterIndex = excelFilters.dateFilter(
+            filterValue: afterUnix,
+            filterIndex: filterIndex,
+            isBefore: false,
+            isFuture: isStart ? false : true,
+            column: column,
+          );
         }
       }
     });
@@ -132,11 +166,23 @@ class _ExcelMenuState extends State<ExcelMenu> {
 
     if (columnType.isDate) {
       if (getUnix(isBefore: false) != 0) {
-        filterIndex = excelFilters.dateFilter(filterValue: getUnix(isBefore: false), filterIndex: filterIndex, isBefore: false, column: currentColumn);
+        filterIndex = excelFilters.dateFilter(
+          filterValue: getUnix(isBefore: false),
+          filterIndex: filterIndex,
+          isBefore: false,
+          isFuture: isStart ? false : true,
+          column: currentColumn,
+        );
       }
 
       if (getUnix(isBefore: true) != 0) {
-        filterIndex = excelFilters.dateFilter(filterValue: getUnix(isBefore: true), filterIndex: filterIndex, isBefore: true, column: currentColumn);
+        filterIndex = excelFilters.dateFilter(
+          filterValue: getUnix(isBefore: true),
+          filterIndex: filterIndex,
+          isBefore: true,
+          isFuture: isStart ? false : true,
+          column: currentColumn,
+        );
       }
     }
 
@@ -164,12 +210,13 @@ class _ExcelMenuState extends State<ExcelMenu> {
     });
 
     filterItems = filterItems.toSet().toList();
-    // filterItems.sort((a, b) => a.compareTo(b));
-    if (columnType.isNumber) {
-      filterItems.sort((a, b) => double.parse(a).compareTo(double.parse(b)));
-    } else {
-      filterItems.sort((a, b) => a.compareTo(b));
-    }
+    filterItems = sortList(filterItems);
+
+    // if (columnType.isNumber) {
+    //   filterItems.sort((a, b) => double.parse(a).compareTo(double.parse(b)));
+    // } else {
+    //   filterItems.sort((a, b) => a.compareTo(b));
+    // }
 
     filterItems.insert(0, 'Select All');
 
@@ -178,7 +225,16 @@ class _ExcelMenuState extends State<ExcelMenu> {
     return filterItems;
   }
 
-  int getUnix({bool isBefore = false}) {
+  String formatDate(int unix){
+    if(unix == 0){
+      return "";
+    }
+    String date = DateTime.fromMillisecondsSinceEpoch(unix).toString();
+    String formatted = widget.column!.formattedValueForDisplay(date);
+    return formatted;
+  }
+
+  int getUnix({bool isBefore = false, bool isStart = false, bool isDelta = true}) {
     int dayUnix = 0;
     int hourUnix = 0;
     int minuteUnix = 0;
@@ -210,7 +266,16 @@ class _ExcelMenuState extends State<ExcelMenu> {
     }
 
     int unix = DateTime.now().millisecondsSinceEpoch + delta;
-    return unix;
+
+    if (isStart) {
+      unix = DateTime.now().millisecondsSinceEpoch - delta;
+    }
+
+    if (isDelta) {
+      return delta;
+    } else {
+      return unix;
+    }
   }
 
   void resetFilter({bool initial = false}) {
@@ -223,12 +288,13 @@ class _ExcelMenuState extends State<ExcelMenu> {
     });
 
     filterItems = filterItems.toSet().toList();
+    filterItems = sortList(filterItems);
 
-    if (columnType.isNumber) {
-      filterItems.sort((a, b) => double.parse(a).compareTo(double.parse(b)));
-    } else {
-      filterItems.sort((a, b) => a.compareTo(b));
-    }
+    // if (columnType.isNumber) {
+    //   filterItems.sort((a, b) => double.parse(a).compareTo(double.parse(b)));
+    // } else {
+    //   filterItems.sort((a, b) => a.compareTo(b));
+    // }
 
     fullCount = filterItems.length;
 
@@ -238,7 +304,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
       widget.stateManager!.rows.forEach((row) {
         checkedList.add(row!.cells[currentColumn]!.value.toString());
       });
-      print(checkedList);
+
       checkedList = checkedList.toSet().toList();
 
       // Apply all filters
@@ -250,7 +316,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
 
         // Add data to inputs
         filters!.forEach((key, value) {
-          if(key != 'Selected') {
+          if (key != 'Selected') {
             controllerMap[key]!.text = value;
           }
         });
@@ -309,8 +375,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
     } else {
       filterData.remove(currentColumn);
     }
-
-    print(filterData);
 
     return filterData;
   }
@@ -515,6 +579,97 @@ class _ExcelMenuState extends State<ExcelMenu> {
                         if (columnType.isDate)
                           Container(
                             // width: 500,
+                            // height: 300,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+
+                                Container(
+                                  width: 150,
+                                  child: columnType.isDate
+                                      ? ListTile(
+                                    minLeadingWidth: 0,
+                                    title: Text(
+                                      currentColumn.toLowerCase().contains('start') ? 'Started Before' : 'Ending Before',
+                                      style: const TextStyle(fontSize: 16),
+                                    ),
+                                    subtitle: Text(formatDate(getUnix(isBefore: true, isStart: isStart, isDelta: false))),
+                                  )
+                                      : Text(
+                                    currentColumn.toLowerCase().contains('start') ? 'Started Before' : 'Ending Before',
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                ),
+
+                                // Container(
+                                //   width: 150,
+                                //   child: Text(
+                                //     currentColumn.toLowerCase().contains('start') ? 'Started Before' : 'Ending Before',
+                                //     style: const TextStyle(fontSize: 16),
+                                //   ),
+                                // ),
+                                Container(
+                                  width: 100,
+                                  child: TextField(
+                                    controller: beforeDayController,
+                                    decoration: const InputDecoration(labelText: 'Days'),
+                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                    keyboardType: TextInputType.number,
+                                    onEditingComplete: () {
+                                      mainFocusNode.requestFocus();
+                                    },
+                                    onChanged: (value) {
+                                      setState(() {
+                                        // filter = value;
+                                        filterRows();
+                                      });
+                                    },
+                                  ),
+                                ),
+                                Container(
+                                  width: 100,
+                                  child: TextField(
+                                    controller: beforeHourController,
+                                    decoration: const InputDecoration(labelText: 'Hours'),
+                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                    keyboardType: TextInputType.number,
+                                    onEditingComplete: () {
+                                      mainFocusNode.requestFocus();
+                                    },
+                                    onChanged: (value) {
+                                      setState(() {
+                                        // filter = value;
+                                        filterRows();
+                                      });
+                                    },
+                                  ),
+                                ),
+                                Container(
+                                  width: 100,
+                                  child: TextField(
+                                    controller: beforeMinController,
+                                    decoration: const InputDecoration(labelText: 'Minutes'),
+                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                    keyboardType: TextInputType.number,
+                                    onEditingComplete: () {
+                                      mainFocusNode.requestFocus();
+                                    },
+                                    onChanged: (value) {
+                                      setState(() {
+                                        // filter = value;
+                                        filterRows();
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                        if (columnType.isDate)
+                          Container(
+                            // width: 500,
                             height: 50,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -522,10 +677,19 @@ class _ExcelMenuState extends State<ExcelMenu> {
                               children: [
                                 Container(
                                   width: 150,
-                                  child: const Text(
-                                    'Ending After',
-                                    style: TextStyle(fontSize: 16),
-                                  ),
+                                  child: columnType.isDate
+                                      ? ListTile(
+                                          minLeadingWidth: 0,
+                                          title: Text(
+                                            currentColumn.toLowerCase().contains('start') ? 'Started After' : 'Ending After',
+                                            style: const TextStyle(fontSize: 16),
+                                          ),
+                                          subtitle: Text(formatDate(getUnix(isBefore: false, isStart: isStart, isDelta: false))),
+                                        )
+                                      : Text(
+                                          currentColumn.toLowerCase().contains('start') ? 'Started After' : 'Ending After',
+                                          style: const TextStyle(fontSize: 16),
+                                        ),
                                 ),
                                 Container(
                                   width: 100,
@@ -584,78 +748,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
                               ],
                             ),
                           ),
-                        if (columnType.isDate)
-                          Container(
-                            // width: 500,
-                            // height: 300,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Container(
-                                  width: 150,
-                                  child: const Text(
-                                    'Ending Before',
-                                    style: TextStyle(fontSize: 16),
-                                  ),
-                                ),
-                                Container(
-                                  width: 100,
-                                  child: TextField(
-                                    controller: beforeDayController,
-                                    decoration: const InputDecoration(labelText: 'Days'),
-                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                                    keyboardType: TextInputType.number,
-                                    onEditingComplete: () {
-                                      mainFocusNode.requestFocus();
-                                    },
-                                    onChanged: (value) {
-                                      setState(() {
-                                        // filter = value;
-                                        filterRows();
-                                      });
-                                    },
-                                  ),
-                                ),
-                                Container(
-                                  width: 100,
-                                  child: TextField(
-                                    controller: beforeHourController,
-                                    decoration: const InputDecoration(labelText: 'Hours'),
-                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                                    keyboardType: TextInputType.number,
-                                    onEditingComplete: () {
-                                      mainFocusNode.requestFocus();
-                                    },
-                                    onChanged: (value) {
-                                      setState(() {
-                                        // filter = value;
-                                        filterRows();
-                                      });
-                                    },
-                                  ),
-                                ),
-                                Container(
-                                  width: 100,
-                                  child: TextField(
-                                    controller: beforeMinController,
-                                    decoration: const InputDecoration(labelText: 'Minutes'),
-                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                                    keyboardType: TextInputType.number,
-                                    onEditingComplete: () {
-                                      mainFocusNode.requestFocus();
-                                    },
-                                    onChanged: (value) {
-                                      setState(() {
-                                        // filter = value;
-                                        filterRows();
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+
                       ],
                     ),
                   ),
@@ -732,6 +825,15 @@ class _ExcelMenuState extends State<ExcelMenu> {
                               'Cancel',
                               style: TextStyle(fontSize: 20),
                             ))),
+                    Text('${resultCount()} items'),
+                    // Container(
+                    //   width: 200,
+                    //   child: CheckboxListTile(
+                    //     title: const Text('Show All'),
+                    //     value: true,
+                    //     onChanged: (value) {},
+                    //   ),
+                    // ),
                     ElevatedButton(
                         onPressed: () {
                           saveAndClose();
@@ -751,5 +853,15 @@ class _ExcelMenuState extends State<ExcelMenu> {
         ),
       ),
     );
+  }
+
+  String resultCount() {
+    int count = 0;
+    widget.stateManager!.refRows!.forEach((element) {
+      if (filterIndex.contains(element!.sortIdx) && checkedList.contains(element.cells[currentColumn]!.value.toString())) {
+        count++;
+      }
+    });
+    return count.toString();
   }
 }

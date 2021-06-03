@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
+import 'package:intl/intl.dart';
+
 
 import '../../dummy_data/development.dart';
 import '../../widget/pluto_example_button.dart';
@@ -42,9 +44,28 @@ class _ColumnFilteringScreenState extends State<ColumnFilteringScreen> {
         },
       ),
       PlutoColumn(
-        title: 'Date',
-        field: 'date',
+        title: 'Start Date',
+        field: 'start date',
+        // type: PlutoColumnType.date(format: 'dd-MMM-yy',),
         type: PlutoColumnType.date(),
+        formatter: (dynamic v) {
+          DateTime date = DateTime.parse(v.toString());
+          DateFormat format = DateFormat('dd-MMM-yy');
+          String dateString = format.format(date);
+          return dateString;
+        },
+      ),
+      PlutoColumn(
+        title: 'End Date',
+        field: 'end date',
+        // type: PlutoColumnType.date(format: 'dd-MMM-yy',),
+        type: PlutoColumnType.date(),
+        formatter: (dynamic v) {
+          DateTime date = DateTime.parse(v.toString());
+          DateFormat format = DateFormat('dd-MMM-yy');
+          String dateString = format.format(date);
+          return dateString;
+        },
       ),
       PlutoColumn(
         title: 'Disable',
