@@ -135,22 +135,34 @@ mixin SelectingState implements IPlutoGridState {
         } else if (key == 'AfterDay') {
           afterUnix += (double.parse(value) * 24 * 60 * 60 * 1000).toInt();
         } else if (key == 'Selected') {
-
           List<String> stringList = [];
           jsonDecode(value).forEach((dynamic element) {
             stringList.add(element.toString());
           });
-
           filterIndex = excelFilters.equalsFilter(filterList: stringList, filterIndex: filterIndex, column: column);
         }
       });
 
+      bool isStart = column.toLowerCase().contains('start');
+
       if (beforeUnix != 0) {
-        filterIndex = excelFilters.dateFilter(filterValue: beforeUnix + DateTime.now().millisecondsSinceEpoch, filterIndex: filterIndex, isBefore: true, column: column);
+        filterIndex = excelFilters.dateFilter(
+          filterValue: beforeUnix + DateTime.now().millisecondsSinceEpoch,
+          filterIndex: filterIndex,
+          isBefore: true,
+          column: column,
+          isFuture: isStart,
+        );
       }
 
       if (afterUnix != 0) {
-        filterIndex = excelFilters.dateFilter(filterValue: afterUnix + DateTime.now().millisecondsSinceEpoch, filterIndex: filterIndex, isBefore: false, column: column);
+        filterIndex = excelFilters.dateFilter(
+          filterValue: afterUnix + DateTime.now().millisecondsSinceEpoch,
+          filterIndex: filterIndex,
+          isBefore: false,
+          column: column,
+          isFuture: isStart,
+        );
       }
     });
 

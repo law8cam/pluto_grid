@@ -9,7 +9,14 @@ class ExcelFilters {
     rows = stateManager!.refRows!.originalList;
   }
 
-  List<int> dateFilter({required int filterValue, required List<int> filterIndex, required bool isBefore, String? column}) {
+  List<int> dateFilter({required int filterValue, required List<int> filterIndex, required bool isBefore, bool isFuture = true, String? column}) {
+
+    if(isFuture){
+      filterValue = DateTime.now().millisecondsSinceEpoch + filterValue;
+    }else{
+      filterValue = DateTime.now().millisecondsSinceEpoch - filterValue;
+    }
+
     filterIndex.removeWhere((index) {
       String element = rows[index]!.cells[column]!.value.toString();
       if (element == 'Select All') {
@@ -25,12 +32,8 @@ class ExcelFilters {
       }
 
       if (isRemove) {
-        // checkedList.remove(element);
         return true;
       } else {
-        // if (!checkedList.contains(element)) {
-        //   checkedList.add(element);
-        // }
         return false;
       }
     });
@@ -72,8 +75,15 @@ class ExcelFilters {
 
   List<int> containsFilter({required String filterValue, required List<int> filterIndex, String? column}) {
     List<String> filterList = filterValue.split(',');
+
+    filterList.removeWhere((element) => element.trim().replaceAll('-', '') == '');
+    
+    bool excludeOnly = true;
     filterList.forEach((element) {
       element = element.trim();
+      if(!element.contains('-')){
+        excludeOnly = false;
+      }
     });
 
     filterIndex.removeWhere((index) {
@@ -84,14 +94,18 @@ class ExcelFilters {
       }
       bool isRemove = true;
 
-      // Keep all the items that contain the includes
-      filterList.forEach((filter) {
-        if (!filter.contains('-')) {
-          if (element.toLowerCase().contains(filter.toLowerCase().trim()) && filter.trim() != '') {
-            isRemove = false;
+      if(excludeOnly){
+        isRemove = false;
+      }else {
+        // Keep all the items that contain the includes
+        filterList.forEach((filter) {
+          if (!filter.contains('-')) {
+            if (element.toLowerCase().contains(filter.toLowerCase().trim()) && filter.trim() != '') {
+              isRemove = false;
+            }
           }
-        }
-      });
+        });
+      }
 
       // Then if item is included, check it does not conflict with exclusion
       if (!isRemove) {
