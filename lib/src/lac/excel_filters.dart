@@ -123,6 +123,55 @@ class ExcelFilters {
     return filterIndex;
   }
 
+  List<String> containsFilterString({required String filterValue, required List<String> itemsToFilter, String? column}) {
+    List<String> filterList = filterValue.split(',');
+
+    filterList.removeWhere((element) => element.trim().replaceAll('-', '') == '');
+
+    bool excludeOnly = true;
+    filterList.forEach((element) {
+      element = element.trim();
+      if(!element.contains('-')){
+        excludeOnly = false;
+      }
+    });
+
+    itemsToFilter.removeWhere((element) {
+
+      if (element == 'Select All') {
+        return false;
+      }
+      bool isRemove = true;
+
+      if(excludeOnly){
+        isRemove = false;
+      }else {
+        // Keep all the items that contain the includes
+        filterList.forEach((filter) {
+          if (!filter.contains('-')) {
+            if (element.toLowerCase().contains(filter.toLowerCase().trim()) && filter.trim() != '') {
+              isRemove = false;
+            }
+          }
+        });
+      }
+
+      // Then if item is included, check it does not conflict with exclusion
+      if (!isRemove) {
+        filterList.forEach((filter) {
+          if (filter.contains('-')) {
+            var exclude = filter.replaceAll('-', '').trim();
+            if (element.toLowerCase().contains(exclude.toLowerCase().trim()) && exclude.trim() != '') {
+              isRemove = true;
+            }
+          }
+        });
+      }
+      return isRemove;
+    });
+    return itemsToFilter;
+  }
+
   List<int> equalsFilter({required List<String> filterList, required List<int> filterIndex, String? column}) {
     filterIndex.removeWhere((index) {
       String element = rows[index]!.cells[column]!.value.toString();

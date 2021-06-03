@@ -73,6 +73,7 @@ class PlutoColumn {
 
   /// Hide the column.
   bool hide;
+  List<String> allItems;
 
   PlutoColumn({
     required this.title,
@@ -96,6 +97,7 @@ class PlutoColumn {
     this.enableSetColumnsMenuItem = true,
     this.enableEditingMode = true,
     this.hide = false,
+    this.allItems = const [],
   }) : _key = UniqueKey();
 
   /// Column key
