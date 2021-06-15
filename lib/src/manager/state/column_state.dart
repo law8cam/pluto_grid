@@ -494,6 +494,8 @@ mixin ColumnState implements IPlutoGridState {
   void showSetColumnsPopup(BuildContext? context) {
     const columnField = 'field';
 
+    // configuration!.menuBackgroundColor = Colors.blue;
+
     var columns = [
       PlutoColumn(
         title: configuration!.localeText.setColumnsTitle,

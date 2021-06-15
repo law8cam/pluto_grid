@@ -419,6 +419,8 @@ class _ExcelMenuState extends State<ExcelMenu> {
       filterRows();
     }
 
+    Color textColor = Theme.of(context).textTheme.bodyText2!.color ?? Colors.black;
+
     return Shortcuts(
       shortcuts: {
         LogicalKeySet(LogicalKeyboardKey.enter): EnterIntent(),
@@ -431,7 +433,8 @@ class _ExcelMenuState extends State<ExcelMenu> {
           child: Container(
             width: 600,
             height: 1000,
-            color: Colors.grey[200],
+            // color: Colors.grey[200],
+            color: Theme.of(context).scaffoldBackgroundColor,
             padding: const EdgeInsets.all(12),
             // margin: EdgeInsets.all(5),
             child: Column(
@@ -462,16 +465,16 @@ class _ExcelMenuState extends State<ExcelMenu> {
                                 height: 50,
                                 child: Row(
                                   children: [
-                                    const Icon(
+                                    Icon(
                                       Icons.filter_alt,
-                                      color: Colors.black54,
+                                      color: textColor,
                                     ),
                                     const SizedBox(
                                       width: 20,
                                     ),
-                                    const Text(
+                                    Text(
                                       'Remove All Filters',
-                                      style: TextStyle(fontSize: 16, color: Colors.black),
+                                      style: TextStyle(fontSize: 16, color: textColor),
                                     ),
                                   ],
                                 ),
@@ -503,16 +506,16 @@ class _ExcelMenuState extends State<ExcelMenu> {
                             height: 50,
                             child: Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.hide_image,
-                                  color: Colors.black54,
+                                  color: textColor,
                                 ),
                                 const SizedBox(
                                   width: 20,
                                 ),
-                                const Text(
+                                Text(
                                   'Hide Column',
-                                  style: TextStyle(fontSize: 16, color: Colors.black),
+                                  style: TextStyle(fontSize: 16, color: textColor),
                                 ),
                               ],
                             ),
@@ -526,15 +529,15 @@ class _ExcelMenuState extends State<ExcelMenu> {
                             height: 50,
                             child: Row(
                               children: [
-                                const Icon(Icons.view_column_outlined, color: Colors.black54),
+                                Icon(Icons.view_column_outlined, color: textColor),
                                 const SizedBox(
                                   width: 20,
                                 ),
-                                const Text(
+                                Text(
                                   'Set Columns',
                                   style: TextStyle(
                                     fontSize: 16,
-                                    color: Colors.black,
+                                    color: textColor,
                                   ),
                                 ),
                               ],
@@ -546,6 +549,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
                 ),
                 const Divider(),
                 Card(
+                  color: Theme.of(context).dialogBackgroundColor,
                   child: Container(
                     padding: const EdgeInsets.only(left: 15, right: 15, bottom: 15),
                     child: Column(
@@ -770,17 +774,17 @@ class _ExcelMenuState extends State<ExcelMenu> {
                               ],
                             ),
                           ),
-
                       ],
                     ),
                   ),
                 ),
                 const Divider(),
                 Card(
+                  color: Theme.of(context).dialogBackgroundColor,
                   child: Container(
                     margin: const EdgeInsets.all(10),
                     height: columnType.isText ? MediaQuery.of(context).size.height - 446 : MediaQuery.of(context).size.height - 574,
-                    color: Colors.white,
+                    color: Theme.of(context).dialogBackgroundColor,
                     child: Scrollbar(
                       isAlwaysShown: true,
                       showTrackOnHover: true,
@@ -793,6 +797,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
                             children: [
                               CheckboxListTile(
                                 tristate: filterItems[index] == 'Select All' ? true : false,
+                                activeColor: Theme.of(context).brightness == Brightness.dark ? Colors.blue : null,
                                 // title: Text(filterItems[index]),
                                 title: Text(filterItems[index] == 'Select All' ? 'Select All' : widget.column!.formattedValueForDisplay(filterItems[index])),
                                 value: filterItems[index] == 'Select All' ? getShowAllChecked() : checkedList.contains(filterItems[index]),
