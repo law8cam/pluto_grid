@@ -8,6 +8,7 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 const double _kScrollbarMinLength = 36.0;
@@ -34,7 +35,7 @@ class PlutoScrollbar extends StatefulWidget {
     Key? key,
     this.horizontalController,
     this.verticalController,
-    this.isAlwaysShown = false,
+    this.isAlwaysShown = true,
     this.thickness = defaultThickness,
     this.thicknessWhileDragging = defaultThicknessWhileDragging,
     this.radius = defaultRadius,
@@ -194,6 +195,9 @@ class _CupertinoScrollbarState extends State<PlutoScrollbar>
 
   // Handle a gesture that drags the scrollbar by the given amount.
   void _dragScrollbar(double primaryDelta) {
+
+    print('Scroll dragging: $primaryDelta');
+
     assert(_currentController != null);
 
     // Convert primaryDelta, the amount that the scrollbar moved since the last
@@ -250,6 +254,9 @@ class _CupertinoScrollbarState extends State<PlutoScrollbar>
   // Long press event callbacks handle the gesture where the user long presses
   // on the scrollbar thumb and then drags the scrollbar without releasing.
   void _handleLongPressStart(LongPressStartDetails details) {
+
+    print('Scroll bar long press!!!');
+
     _currentController = _controller;
     final Axis? direction = _getDirection();
     if (direction == null) {
@@ -398,17 +405,26 @@ class _CupertinoScrollbarState extends State<PlutoScrollbar>
     super.dispose();
   }
 
+  FocusNode focusNode = FocusNode();
+
   @override
   Widget build(BuildContext context) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: _handleScrollNotification,
-      child: RepaintBoundary(
-        child: RawGestureDetector(
-          gestures: _gestures,
-          child: CustomPaint(
-            key: _customPaintKey,
-            foregroundPainter: _painter,
-            child: RepaintBoundary(child: widget.child),
+    return GestureDetector(
+      onLongPressStart: (details) => _handleLongPressStart(details),
+      onLongPress: () => _handleLongPress(),
+      onLongPressMoveUpdate: (details) => _handleLongPressMoveUpdate(details),
+      onLongPressEnd: (details) => _handleLongPress(),
+
+      child: NotificationListener<ScrollNotification>(
+        onNotification: _handleScrollNotification,
+        child: RepaintBoundary(
+          child: RawGestureDetector(
+            // gestures: _gestures,
+            child: CustomPaint(
+              key: _customPaintKey,
+              foregroundPainter: _painter,
+              child: RepaintBoundary(child: widget.child),
+            ),
           ),
         ),
       ),

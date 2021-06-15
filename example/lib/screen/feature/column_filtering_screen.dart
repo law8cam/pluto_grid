@@ -127,52 +127,55 @@ class _ColumnFilteringScreenState extends State<ColumnFilteringScreen> {
 
         }, child: const Text('Testing', style: TextStyle(fontSize: 30),))
       ],
-      body: PlutoGrid(
-        columns: columns,
-        rows: rows,
-        onLoaded: (PlutoGridOnLoadedEvent event) {
+      body: Container(
+        // width: 1000,
+        child: PlutoGrid(
+          columns: columns,
+          rows: rows,
+          onLoaded: (PlutoGridOnLoadedEvent event) {
 
-          stateManager = event.stateManager!;
-          stateManager.addListener(() {
-            // print('State Listener');
-          });
+            stateManager = event.stateManager!;
+            stateManager.addListener(() {
+              // print('State Listener');
+            });
 
-          stateManager.eventManager!.listener((event) {
-            // print('Event Listener');
-          });
+            stateManager.eventManager!.listener((event) {
+              // print('Event Listener');
+            });
 
-        },
-        onChanged: (PlutoGridOnChangedEvent event) {
-          print(event);
-        },
-        configuration: PlutoGridConfiguration(
+          },
+          onChanged: (PlutoGridOnChangedEvent event) {
+            print(event);
+          },
+          configuration: PlutoGridConfiguration(
 
-          scrollbarConfig: const PlutoGridScrollbarConfig(isAlwaysShown: true, ),
-          /// If columnFilterConfig is not set, the default setting is applied.
-          ///
-          /// Return the value returned by resolveDefaultColumnFilter through the resolver function.
-          /// Prevents errors returning filters that are not in the filters list.
-          // columnFilterConfig: PlutoGridColumnFilterConfig(
-          //   filters: const [
-          //     ...FilterHelper.defaultFilters,
-          //     // custom filter
-          //     ClassYouImplemented(),
-          //   ],
-          //   resolveDefaultColumnFilter: (column, resolver) {
-          //     if (column.field == 'text') {
-          //       return resolver<PlutoFilterTypeContains>() as PlutoFilterType;
-          //     } else if (column.field == 'number') {
-          //       return resolver<PlutoFilterTypeGreaterThan>()
-          //           as PlutoFilterType;
-          //     } else if (column.field == 'date') {
-          //       return resolver<PlutoFilterTypeLessThan>() as PlutoFilterType;
-          //     } else if (column.field == 'select') {
-          //       return resolver<ClassYouImplemented>() as PlutoFilterType;
-          //     }
-          //
-          //     return resolver<PlutoFilterTypeContains>() as PlutoFilterType;
-          //   },
-          // ),
+            scrollbarConfig: const PlutoGridScrollbarConfig(isAlwaysShown: true, scrollbarThickness: 30,draggableScrollbar: true,scrollbarThicknessWhileDragging: 30,),
+            /// If columnFilterConfig is not set, the default setting is applied.
+            ///
+            /// Return the value returned by resolveDefaultColumnFilter through the resolver function.
+            /// Prevents errors returning filters that are not in the filters list.
+            // columnFilterConfig: PlutoGridColumnFilterConfig(
+            //   filters: const [
+            //     ...FilterHelper.defaultFilters,
+            //     // custom filter
+            //     ClassYouImplemented(),
+            //   ],
+            //   resolveDefaultColumnFilter: (column, resolver) {
+            //     if (column.field == 'text') {
+            //       return resolver<PlutoFilterTypeContains>() as PlutoFilterType;
+            //     } else if (column.field == 'number') {
+            //       return resolver<PlutoFilterTypeGreaterThan>()
+            //           as PlutoFilterType;
+            //     } else if (column.field == 'date') {
+            //       return resolver<PlutoFilterTypeLessThan>() as PlutoFilterType;
+            //     } else if (column.field == 'select') {
+            //       return resolver<ClassYouImplemented>() as PlutoFilterType;
+            //     }
+            //
+            //     return resolver<PlutoFilterTypeContains>() as PlutoFilterType;
+            //   },
+            // ),
+          ),
         ),
       ),
     );
