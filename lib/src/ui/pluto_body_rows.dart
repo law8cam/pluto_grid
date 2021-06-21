@@ -11,8 +11,7 @@ class PlutoBodyRows extends PlutoStatefulWidget {
   _PlutoBodyRowsState createState() => _PlutoBodyRowsState();
 }
 
-abstract class _PlutoBodyRowsStateWithChange
-    extends PlutoStateWithChange<PlutoBodyRows> {
+abstract class _PlutoBodyRowsStateWithChange extends PlutoStateWithChange<PlutoBodyRows> {
   List<PlutoColumn>? columns;
 
   List<PlutoRow?>? rows;
@@ -40,15 +39,11 @@ abstract class _PlutoBodyRowsStateWithChange
   }
 
   List<PlutoColumn> _getColumns() {
-    return widget.stateManager.showFrozenColumn == true
-        ? widget.stateManager.bodyColumns
-        : widget.stateManager.columns;
+    return widget.stateManager.showFrozenColumn == true ? widget.stateManager.bodyColumns : widget.stateManager.columns;
   }
 
   double _getWidth() {
-    return widget.stateManager.showFrozenColumn == true
-        ? widget.stateManager.bodyColumnsWidth
-        : widget.stateManager.columnsWidth;
+    return widget.stateManager.showFrozenColumn == true ? widget.stateManager.bodyColumnsWidth : widget.stateManager.columnsWidth;
   }
 }
 
@@ -81,25 +76,20 @@ class _PlutoBodyRowsState extends _PlutoBodyRowsStateWithChange {
 
   @override
   Widget build(BuildContext context) {
+    // print("verticalScroll");
+    // print(verticalScroll);
+    // print("horizontalScroll");
+    // print(horizontalScroll);
+
     return PlutoScrollbar(
-      verticalController:
-          widget.stateManager.configuration!.scrollbarConfig.draggableScrollbar
-              ? verticalScroll
-              : null,
-      horizontalController:
-          widget.stateManager.configuration!.scrollbarConfig.draggableScrollbar
-              ? horizontalScroll
-              : null,
-      isAlwaysShown:
-          widget.stateManager.configuration!.scrollbarConfig.isAlwaysShown,
-      thickness:
-          widget.stateManager.configuration!.scrollbarConfig.scrollbarThickness,
-      thicknessWhileDragging: widget.stateManager.configuration!.scrollbarConfig
-          .scrollbarThicknessWhileDragging,
-      radius:
-          widget.stateManager.configuration!.scrollbarConfig.scrollbarRadius,
-      radiusWhileDragging: widget.stateManager.configuration!.scrollbarConfig
-          .scrollbarRadiusWhileDragging,
+      singleAxis: 'Horz',
+      verticalController: widget.stateManager.configuration!.scrollbarConfig.draggableScrollbar ? verticalScroll : null,
+      horizontalController: widget.stateManager.configuration!.scrollbarConfig.draggableScrollbar ? horizontalScroll : null,
+      isAlwaysShown: widget.stateManager.configuration!.scrollbarConfig.isAlwaysShown,
+      thickness: widget.stateManager.configuration!.scrollbarConfig.scrollbarThickness,
+      thicknessWhileDragging: widget.stateManager.configuration!.scrollbarConfig.scrollbarThicknessWhileDragging,
+      radius: widget.stateManager.configuration!.scrollbarConfig.scrollbarRadius,
+      radiusWhileDragging: widget.stateManager.configuration!.scrollbarConfig.scrollbarRadiusWhileDragging,
       child: SingleChildScrollView(
         controller: horizontalScroll,
         scrollDirection: Axis.horizontal,
