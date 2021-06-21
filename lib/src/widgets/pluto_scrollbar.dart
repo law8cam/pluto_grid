@@ -368,8 +368,6 @@ class _CupertinoScrollbarState extends State<PlutoScrollbar>
     }
 
 
-    print(metrics);
-
     // print(metrics.axisDirection);
 
     // todo: undo
@@ -394,8 +392,6 @@ class _CupertinoScrollbarState extends State<PlutoScrollbar>
       if (_fadeoutAnimationController.status != AnimationStatus.forward) {
         _fadeoutAnimationController.forward();
       }
-
-      print(metrics.axisDirection);
       _fadeoutTimer?.cancel();
 
       // todo: this updates the bar axis
