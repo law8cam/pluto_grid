@@ -128,7 +128,6 @@ class _ColumnFilteringScreenState extends State<ColumnFilteringScreen> {
         }, child: const Text('Testing', style: TextStyle(fontSize: 30),))
       ],
       body: Container(
-        // width: 1000,
         child: PlutoGrid(
           columns: columns,
           rows: rows,
@@ -149,7 +148,12 @@ class _ColumnFilteringScreenState extends State<ColumnFilteringScreen> {
           },
           configuration: PlutoGridConfiguration(
 
-            scrollbarConfig: const PlutoGridScrollbarConfig(isAlwaysShown: true, scrollbarThickness: 30,draggableScrollbar: true,scrollbarThicknessWhileDragging: 30,),
+            scrollbarConfig: const PlutoGridScrollbarConfig(
+              isAlwaysShown: true,
+              draggableScrollbar: true,
+              scrollbarThickness: 8
+
+            ),
             /// If columnFilterConfig is not set, the default setting is applied.
             ///
             /// Return the value returned by resolveDefaultColumnFilter through the resolver function.

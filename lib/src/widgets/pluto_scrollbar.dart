@@ -8,7 +8,6 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 const double _kScrollbarMinLength = 36.0;
@@ -16,6 +15,8 @@ const double _kScrollbarMinOverscrollLength = 8.0;
 const Duration _kScrollbarTimeToFade = Duration(milliseconds: 1200);
 const Duration _kScrollbarFadeDuration = Duration(milliseconds: 250);
 const Duration _kScrollbarResizeDuration = Duration(milliseconds: 100);
+
+ScrollMetrics? metrics2;
 
 // Extracted from iOS 13.1 beta using Debug View Hierarchy.
 const Color _kScrollbarColor = CupertinoDynamicColor.withBrightness(
@@ -35,11 +36,12 @@ class PlutoScrollbar extends StatefulWidget {
     Key? key,
     this.horizontalController,
     this.verticalController,
-    this.isAlwaysShown = true,
+    this.isAlwaysShown = false,
     this.thickness = defaultThickness,
     this.thicknessWhileDragging = defaultThicknessWhileDragging,
     this.radius = defaultRadius,
     this.radiusWhileDragging = defaultRadiusWhileDragging,
+    this.singleAxis = '',
     required this.child,
   })  : assert(thickness < double.infinity),
         assert(thicknessWhileDragging < double.infinity),
@@ -71,6 +73,8 @@ class PlutoScrollbar extends StatefulWidget {
 
   final Radius radiusWhileDragging;
 
+  final String singleAxis;
+
   @override
   _CupertinoScrollbarState createState() => _CupertinoScrollbarState();
 }
@@ -101,6 +105,10 @@ class _CupertinoScrollbarState extends State<PlutoScrollbar>
   ScrollController? _currentController;
 
   ScrollController? get _controller {
+
+    //todo Undo
+    // return widget.horizontalController;
+
     if (_currentAxis == null) {
       return widget.verticalController ??
           widget.horizontalController ??
@@ -186,8 +194,8 @@ class _CupertinoScrollbarState extends State<PlutoScrollbar>
     WidgetsBinding.instance!.addPostFrameCallback((Duration duration) {
       if (widget.isAlwaysShown) {
         _fadeoutTimer?.cancel();
-        if (widget.verticalController!.hasClients) {
-          widget.verticalController!.position.didUpdateScrollPositionBy(0);
+        if (widget.horizontalController!.hasClients) {
+          widget.horizontalController!.position.didUpdateScrollPositionBy(0);
         }
       }
     });
@@ -195,9 +203,6 @@ class _CupertinoScrollbarState extends State<PlutoScrollbar>
 
   // Handle a gesture that drags the scrollbar by the given amount.
   void _dragScrollbar(double primaryDelta) {
-
-    print('Scroll dragging: $primaryDelta');
-
     assert(_currentController != null);
 
     // Convert primaryDelta, the amount that the scrollbar moved since the last
@@ -215,7 +220,7 @@ class _CupertinoScrollbarState extends State<PlutoScrollbar>
               ? Offset(0.0, scrollOffsetGlobal)
               : Offset(scrollOffsetGlobal, 0.0),
         ),
-        () {},
+            () {},
       );
     } else {
       _drag!.update(DragUpdateDetails(
@@ -242,6 +247,8 @@ class _CupertinoScrollbarState extends State<PlutoScrollbar>
 
   Axis? _getDirection() {
     try {
+      //todo: undo
+      // return Axis.horizontal;
       return _currentController!.position.axis;
     } catch (_) {
       // Ignore the gesture if we cannot determine the direction.
@@ -254,9 +261,6 @@ class _CupertinoScrollbarState extends State<PlutoScrollbar>
   // Long press event callbacks handle the gesture where the user long presses
   // on the scrollbar thumb and then drags the scrollbar without releasing.
   void _handleLongPressStart(LongPressStartDetails details) {
-
-    print('Scroll bar long press!!!');
-
     _currentController = _controller;
     final Axis? direction = _getDirection();
     if (direction == null) {
@@ -285,7 +289,7 @@ class _CupertinoScrollbarState extends State<PlutoScrollbar>
     _fadeoutTimer?.cancel();
     _thicknessAnimationController.forward().then<void>(
           (_) => HapticFeedback.mediumImpact(),
-        );
+    );
   }
 
   void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
@@ -351,7 +355,37 @@ class _CupertinoScrollbarState extends State<PlutoScrollbar>
       return false;
     }
 
-    _currentAxis = axisDirectionToAxis(metrics.axisDirection);
+    if(widget.singleAxis == "Horz"){
+      if(metrics.axisDirection == AxisDirection.right){
+        metrics2 = metrics;
+      }
+    } else if(widget.singleAxis == "Vert"){
+      if(metrics.axisDirection == AxisDirection.down){
+        metrics2 = metrics;
+      }
+    }else{
+      metrics2 = metrics;
+    }
+
+
+    print(metrics);
+
+    // print(metrics.axisDirection);
+
+    // todo: undo
+    // _currentAxis = axisDirectionToAxis(metrics.axisDirection);
+
+    if(widget.singleAxis == "Horz"){
+      _currentAxis = axisDirectionToAxis(AxisDirection.right);
+    } else if(widget.singleAxis == "Vert"){
+      _currentAxis = axisDirectionToAxis(AxisDirection.down);
+    }else{
+      _currentAxis = axisDirectionToAxis(metrics.axisDirection);
+    }
+
+    // print(_currentAxis);
+
+    // print("Scroll Notification");
 
     if (notification is ScrollUpdateNotification ||
         notification is UserScrollNotification ||
@@ -361,14 +395,19 @@ class _CupertinoScrollbarState extends State<PlutoScrollbar>
         _fadeoutAnimationController.forward();
       }
 
+      print(metrics.axisDirection);
       _fadeoutTimer?.cancel();
-      _painter!.update(metrics, metrics.axisDirection);
+
+      // todo: this updates the bar axis
+      _painter!.update(metrics2!, metrics2!.axisDirection);
+      // _painter!.update(metrics, metrics.axisDirection);
     } else if (notification is ScrollEndNotification) {
       // On iOS, the scrollbar can only go away once the user lifted the finger.
       if (_dragScrollbarAxisPosition == null) {
         _startFadeoutTimer();
       }
     }
+
     return false;
   }
 
@@ -376,22 +415,22 @@ class _CupertinoScrollbarState extends State<PlutoScrollbar>
   // thumb.
   Map<Type, GestureRecognizerFactory> get _gestures {
     final Map<Type, GestureRecognizerFactory> gestures =
-        <Type, GestureRecognizerFactory>{};
+    <Type, GestureRecognizerFactory>{};
 
     gestures[_ThumbPressGestureRecognizer] =
         GestureRecognizerFactoryWithHandlers<_ThumbPressGestureRecognizer>(
-      () => _ThumbPressGestureRecognizer(
-        debugOwner: this,
-        customPaintKey: _customPaintKey,
-      ),
-      (_ThumbPressGestureRecognizer instance) {
-        instance
-          ..onLongPressStart = _handleLongPressStart
-          ..onLongPress = _handleLongPress
-          ..onLongPressMoveUpdate = _handleLongPressMoveUpdate
-          ..onLongPressEnd = _handleLongPressEnd;
-      },
-    );
+              () => _ThumbPressGestureRecognizer(
+            debugOwner: this,
+            customPaintKey: _customPaintKey,
+          ),
+              (_ThumbPressGestureRecognizer instance) {
+            instance
+              ..onLongPressStart = _handleLongPressStart
+              ..onLongPress = _handleLongPress
+              ..onLongPressMoveUpdate = _handleLongPressMoveUpdate
+              ..onLongPressEnd = _handleLongPressEnd;
+          },
+        );
 
     return gestures;
   }
@@ -405,26 +444,17 @@ class _CupertinoScrollbarState extends State<PlutoScrollbar>
     super.dispose();
   }
 
-  FocusNode focusNode = FocusNode();
-
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onLongPressStart: (details) => _handleLongPressStart(details),
-      onLongPress: () => _handleLongPress(),
-      onLongPressMoveUpdate: (details) => _handleLongPressMoveUpdate(details),
-      onLongPressEnd: (details) => _handleLongPress(),
-
-      child: NotificationListener<ScrollNotification>(
-        onNotification: _handleScrollNotification,
-        child: RepaintBoundary(
-          child: RawGestureDetector(
-            // gestures: _gestures,
-            child: CustomPaint(
-              key: _customPaintKey,
-              foregroundPainter: _painter,
-              child: RepaintBoundary(child: widget.child),
-            ),
+    return NotificationListener<ScrollNotification>(
+      onNotification: _handleScrollNotification,
+      child: RepaintBoundary(
+        child: RawGestureDetector(
+          gestures: _gestures,
+          child: CustomPaint(
+            key: _customPaintKey,
+            foregroundPainter: _painter,
+            child: RepaintBoundary(child: widget.child),
           ),
         ),
       ),
@@ -442,11 +472,11 @@ class _ThumbPressGestureRecognizer extends LongPressGestureRecognizer {
     required GlobalKey customPaintKey,
   })  : _customPaintKey = customPaintKey,
         super(
-          postAcceptSlopTolerance: postAcceptSlopTolerance,
-          kind: kind,
-          debugOwner: debugOwner,
-          duration: const Duration(milliseconds: 100),
-        );
+        postAcceptSlopTolerance: postAcceptSlopTolerance,
+        kind: kind,
+        debugOwner: debugOwner,
+        duration: const Duration(milliseconds: 100),
+      );
 
   final GlobalKey _customPaintKey;
 
@@ -467,18 +497,26 @@ bool _hitTestInteractive(
   if (customPaintKey.currentContext == null) {
     return false;
   }
+
   final CustomPaint customPaint =
-      customPaintKey.currentContext!.widget as CustomPaint;
+  customPaintKey.currentContext!.widget as CustomPaint;
   final ScrollbarPainter painter =
-      customPaint.foregroundPainter! as ScrollbarPainter;
-  final Offset localOffset = _getLocalOffset(customPaintKey, offset);
+  customPaint.foregroundPainter! as ScrollbarPainter;
+  // final Offset localOffset = _getLocalOffset(customPaintKey, offset);
+  final Offset localOffset = _getLocalOffset(customPaintKey, Offset(offset.dx + 10, offset.dy - 10));
   // We only receive track taps that are not on the thumb.
-  return painter.hitTestInteractive(localOffset, kind) &&
-      !painter.hitTestOnlyThumbInteractive(localOffset, kind);
+
+  bool test1 = painter.hitTestInteractive(localOffset, PointerDeviceKind.touch);
+  bool test2 = !painter.hitTestOnlyThumbInteractive(localOffset, kind);
+
+  return test1 && test2;
+
+  // return painter.hitTestInteractive(localOffset, kind) &&
+  //     !painter.hitTestOnlyThumbInteractive(localOffset, kind);
 }
 
 Offset _getLocalOffset(GlobalKey scrollbarPainterKey, Offset position) {
   final RenderBox renderBox =
-      scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
+  scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
   return renderBox.globalToLocal(position);
 }
