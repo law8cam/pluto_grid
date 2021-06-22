@@ -779,58 +779,60 @@ class _ExcelMenuState extends State<ExcelMenu> {
                   ),
                 ),
                 const Divider(),
-                Card(
-                  color: Theme.of(context).dialogBackgroundColor,
-                  child: Container(
-                    margin: const EdgeInsets.all(10),
-                    height: columnType.isText ? MediaQuery.of(context).size.height - 446 : MediaQuery.of(context).size.height - 574,
+                Expanded(
+                  child: Card(
                     color: Theme.of(context).dialogBackgroundColor,
-                    child: Scrollbar(
-                      isAlwaysShown: true,
-                      showTrackOnHover: true,
-                      child: ListView.builder(
-                        itemCount: filterItems.length,
-                        itemBuilder: (context, index) => Container(
-                          width: 400,
-                          // height: 30,
-                          child: Column(
-                            children: [
-                              CheckboxListTile(
-                                tristate: filterItems[index] == 'Select All' ? true : false,
-                                activeColor: Theme.of(context).brightness == Brightness.dark ? Colors.blue : null,
-                                // title: Text(filterItems[index]),
-                                title: Text(filterItems[index] == 'Select All' ? 'Select All' : widget.column!.formattedValueForDisplay(filterItems[index])),
-                                value: filterItems[index] == 'Select All' ? getShowAllChecked() : checkedList.contains(filterItems[index]),
-                                onChanged: (value) {
-                                  var title = filterItems[index];
-                                  if (title == 'Select All') {
-                                    setState(() {
-                                      // If Select All is in checkedLists
-                                      // Clear check List
-                                      if (checkedList.contains(title)) {
-                                        // then set as true
-                                        checkedList = [];
-                                      } else {
-                                        checkedList = [];
-                                        checkedList.addAll(filterItems);
-                                      }
-                                    });
-                                  } else {
-                                    setState(() {
-                                      checked[title] = value!;
-                                      if (value && !checkedList.contains(title)) {
-                                        checkedList.add(title);
-                                      } else {
-                                        checkedList.remove(title);
-                                      }
-                                    });
-                                  }
-                                },
-                              ),
-                              const Divider(
-                                height: 1,
-                              ),
-                            ],
+                    child: Container(
+                      margin: const EdgeInsets.all(10),
+                      // height: columnType.isText ? MediaQuery.of(context).size.height - 446 : MediaQuery.of(context).size.height - 574,
+                      color: Theme.of(context).dialogBackgroundColor,
+                      child: Scrollbar(
+                        isAlwaysShown: true,
+                        showTrackOnHover: true,
+                        child: ListView.builder(
+                          itemCount: filterItems.length,
+                          itemBuilder: (context, index) => Container(
+                            width: 400,
+                            // height: 30,
+                            child: Column(
+                              children: [
+                                CheckboxListTile(
+                                  tristate: filterItems[index] == 'Select All' ? true : false,
+                                  activeColor: Theme.of(context).brightness == Brightness.dark ? Colors.blue : null,
+                                  // title: Text(filterItems[index]),
+                                  title: Text(filterItems[index] == 'Select All' ? 'Select All' : widget.column!.formattedValueForDisplay(filterItems[index])),
+                                  value: filterItems[index] == 'Select All' ? getShowAllChecked() : checkedList.contains(filterItems[index]),
+                                  onChanged: (value) {
+                                    var title = filterItems[index];
+                                    if (title == 'Select All') {
+                                      setState(() {
+                                        // If Select All is in checkedLists
+                                        // Clear check List
+                                        if (checkedList.contains(title)) {
+                                          // then set as true
+                                          checkedList = [];
+                                        } else {
+                                          checkedList = [];
+                                          checkedList.addAll(filterItems);
+                                        }
+                                      });
+                                    } else {
+                                      setState(() {
+                                        checked[title] = value!;
+                                        if (value && !checkedList.contains(title)) {
+                                          checkedList.add(title);
+                                        } else {
+                                          checkedList.remove(title);
+                                        }
+                                      });
+                                    }
+                                  },
+                                ),
+                                const Divider(
+                                  height: 1,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
