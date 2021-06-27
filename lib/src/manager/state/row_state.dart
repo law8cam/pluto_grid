@@ -348,9 +348,11 @@ mixin RowState implements IPlutoGridState {
       return;
     }
 
-    final start = top ? 0 : refRows!.isNotEmpty
-        ? refRows!.map((row) => row!.sortIdx ?? 0).reduce(max) + 1
-        : 0;
+    final start = top
+        ? 0
+        : refRows!.isNotEmpty
+            ? refRows!.map((row) => row!.sortIdx ?? 0).reduce(max) + 1
+            : 0;
 
     PlutoGridStateManager.initializeRows(
       refColumns,
@@ -358,8 +360,11 @@ mixin RowState implements IPlutoGridState {
       start: start,
     );
 
-    refRows!.addAll(rows);
-
+    if (top) {
+      refRows!.insertAll(0, rows);
+    } else {
+      refRows!.addAll(rows);
+    }
     notifyListeners();
   }
 
