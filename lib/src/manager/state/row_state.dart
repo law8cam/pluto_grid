@@ -343,12 +343,12 @@ mixin RowState implements IPlutoGridState {
     appendRows(getNewRows(count: count));
   }
 
-  void appendRows(List<PlutoRow?> rows) {
+  void appendRows(List<PlutoRow?> rows, {bool top = false}) {
     if (rows.isEmpty) {
       return;
     }
 
-    final start = refRows!.isNotEmpty
+    final start = top ? 0 : refRows!.isNotEmpty
         ? refRows!.map((row) => row!.sortIdx ?? 0).reduce(max) + 1
         : 0;
 
