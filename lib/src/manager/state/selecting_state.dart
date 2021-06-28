@@ -101,10 +101,11 @@ mixin SelectingState implements IPlutoGridState {
   void applyFiltersNew(Map<String, Map<String, String>> filterData) {
     _filtersNew = filterData;
 
-    List<int> filterIndex = [];
+    List<String> filterIndex = [];
 
     eventManager!.stateManager!.refRows!.originalList.forEach((row) {
-      filterIndex.add(row!.sortIdx as int);
+      // filterIndex.add(row!.sortIdx as int);
+      filterIndex.add(row!.key.toString());
     });
 
     late ExcelFilters excelFilters = ExcelFilters(stateManager: eventManager!.stateManager);

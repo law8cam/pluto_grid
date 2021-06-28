@@ -33,9 +33,8 @@ class ExcelMenu extends StatefulWidget {
 
 class _ExcelMenuState extends State<ExcelMenu> {
   List<String> filterItems = [];
-  List<int> filterIndex = [];
-  late ExcelFilters excelFilters = ExcelFilters(
-      stateManager: widget.stateManager!);
+  List<String> filterIndex = [];
+  late ExcelFilters excelFilters = ExcelFilters(stateManager: widget.stateManager!);
 
   late List<PlutoRow?> rows = widget.stateManager!.refRows!.originalList;
 
@@ -75,8 +74,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
     'AfterDay': afterDayController,
   };
 
-  late Map<String, Map<String, String>> filterData = widget.stateManager!
-      .filtersNew;
+  late Map<String, Map<String, String>> filterData = widget.stateManager!.filtersNew;
 
   Map<String, bool> checked = {};
   List<String> checkedList = [];
@@ -102,7 +100,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
 
   /// Applies the filter rows using text and other column data
   List<String> filterRows({bool reset = true, bool initial = false}) {
-
     // Why doing this?
     if (reset) {
       resetFilter(initial: initial);
@@ -116,21 +113,13 @@ class _ExcelMenuState extends State<ExcelMenu> {
         if (column != currentColumn) {
           int beforeUnix = 0;
           int afterUnix = 0;
-
           filterMap.forEach((key, value) {
             if (key == 'Contains') {
-              filterIndex = excelFilters.containsFilter(
-                  filterValue: value, filterIndex: filterIndex, column: column);
+              filterIndex = excelFilters.containsFilter(filterValue: value, filterIndex: filterIndex, column: column);
             } else if (key == 'Greater') {
-              filterIndex = excelFilters.numberFilter(filterValue: value,
-                  filterIndex: filterIndex,
-                  isGreater: true,
-                  column: column);
+              filterIndex = excelFilters.numberFilter(filterValue: value, filterIndex: filterIndex, isGreater: true, column: column);
             } else if (key == 'Lesser') {
-              filterIndex = excelFilters.numberFilter(filterValue: value,
-                  filterIndex: filterIndex,
-                  isGreater: false,
-                  column: column);
+              filterIndex = excelFilters.numberFilter(filterValue: value, filterIndex: filterIndex, isGreater: false, column: column);
             } else if (key == 'BeforeMin') {
               beforeUnix += (double.parse(value) * 60 * 1000).toInt();
             } else if (key == 'BeforeHour') {
@@ -148,9 +137,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
               jsonDecode(value).forEach((dynamic element) {
                 stringList.add(element.toString());
               });
-              filterIndex = excelFilters.equalsFilter(filterList: stringList,
-                  filterIndex: filterIndex,
-                  column: column);
+              filterIndex = excelFilters.equalsFilter(filterList: stringList, filterIndex: filterIndex, column: column);
             }
           });
 
@@ -179,10 +166,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
 
     // Filter using text fields
     if (containsController.value.text.isNotEmpty) {
-      filterIndex = excelFilters.containsFilter(
-          filterValue: containsController.value.text,
-          filterIndex: filterIndex,
-          column: currentColumn);
+      filterIndex = excelFilters.containsFilter(filterValue: containsController.value.text, filterIndex: filterIndex, column: currentColumn);
     }
 
     if (columnType.isDate) {
@@ -209,19 +193,11 @@ class _ExcelMenuState extends State<ExcelMenu> {
 
     if (columnType.isNumber) {
       if (greaterController.value.text.isNotEmpty) {
-        filterIndex = excelFilters.numberFilter(
-            filterValue: greaterController.value.text,
-            filterIndex: filterIndex,
-            isGreater: true,
-            column: currentColumn);
+        filterIndex = excelFilters.numberFilter(filterValue: greaterController.value.text, filterIndex: filterIndex, isGreater: true, column: currentColumn);
       }
 
       if (lesserController.value.text.isNotEmpty) {
-        filterIndex = excelFilters.numberFilter(
-            filterValue: lesserController.value.text,
-            filterIndex: filterIndex,
-            isGreater: false,
-            column: currentColumn);
+        filterIndex = excelFilters.numberFilter(filterValue: lesserController.value.text, filterIndex: filterIndex, isGreater: false, column: currentColumn);
       }
     }
 
@@ -234,15 +210,16 @@ class _ExcelMenuState extends State<ExcelMenu> {
     }
 
     filterItems = [];
+
     filterIndex.forEach((index) {
-      filterItems.add(rows[index]!.cells[currentColumn]!.value.toString());
+      PlutoRow? row = excelFilters.rowFromKey(index);
+      filterItems.add(row!.cells[currentColumn]!.value.toString());
+      // filterItems.add(rows[index]!.cells[currentColumn]!.value.toString());
     });
 
     if (displayAll && widget.column!.allItems.isNotEmpty) {
       var additionalItems = excelFilters.containsFilterString(
-          filterValue: containsController.value.text,
-          itemsToFilter: []..addAll(widget.column!.allItems),
-          column: currentColumn);
+          filterValue: containsController.value.text, itemsToFilter: []..addAll(widget.column!.allItems), column: currentColumn);
       filterItems.addAll(additionalItems);
     }
 
@@ -265,21 +242,14 @@ class _ExcelMenuState extends State<ExcelMenu> {
     return formatted;
   }
 
-  int getUnix(
-      {bool isBefore = false, bool isStart = false, bool isDelta = true}) {
+  int getUnix({bool isBefore = false, bool isStart = false, bool isDelta = true}) {
     int dayUnix = 0;
     int hourUnix = 0;
     int minuteUnix = 0;
 
-    String dayString = isBefore
-        ? beforeDayController.value.text
-        : afterDayController.value.text;
-    String hourString = isBefore
-        ? beforeHourController.value.text
-        : afterHourController.value.text;
-    String minuteString = isBefore
-        ? beforeMinController.value.text
-        : afterMinController.value.text;
+    String dayString = isBefore ? beforeDayController.value.text : afterDayController.value.text;
+    String hourString = isBefore ? beforeHourController.value.text : afterHourController.value.text;
+    String minuteString = isBefore ? beforeMinController.value.text : afterMinController.value.text;
 
     try {
       if (double.tryParse(dayString) != null) {
@@ -303,14 +273,10 @@ class _ExcelMenuState extends State<ExcelMenu> {
       return 0;
     }
 
-    int unix = DateTime
-        .now()
-        .millisecondsSinceEpoch + delta;
+    int unix = DateTime.now().millisecondsSinceEpoch + delta;
 
     if (isStart) {
-      unix = DateTime
-          .now()
-          .millisecondsSinceEpoch - delta;
+      unix = DateTime.now().millisecondsSinceEpoch - delta;
     }
 
     if (isDelta) {
@@ -321,13 +287,13 @@ class _ExcelMenuState extends State<ExcelMenu> {
   }
 
   void resetFilter({bool initial = false}) {
-
     filterItems = [];
 
     // Populate with the original/full list
     rows.forEach((row) {
       filterItems.add(row!.cells[widget.column!.field]!.value.toString());
-      filterIndex.add(row.sortIdx as int);
+      // filterIndex.add(row.sortIdx as int);
+      filterIndex.add(row.key.toString());
     });
 
     // Remove duplicates and sort
@@ -382,12 +348,11 @@ class _ExcelMenuState extends State<ExcelMenu> {
   }
 
   bool? getShowAllChecked() {
-
     bool allChecked = true;
     bool noneChecked = true;
 
     filterItems.forEach((element) {
-      if(element != 'Select All') {
+      if (element != 'Select All') {
         if (checkedList.contains(element)) {
           noneChecked = false;
         } else {
@@ -396,11 +361,11 @@ class _ExcelMenuState extends State<ExcelMenu> {
       }
     });
 
-    if(allChecked){
+    if (allChecked) {
       return true;
-    }else if(noneChecked){
+    } else if (noneChecked) {
       return false;
-    }else{
+    } else {
       return null;
     }
 
@@ -445,15 +410,14 @@ class _ExcelMenuState extends State<ExcelMenu> {
     widget.stateManager!.setFiltersNewColumns(newData.keys.toList());
 
     // Resize to trigger column filter icon
-    widget.stateManager!.resizeColumn(
-        widget.stateManager!.columns[0].key, 0.00001);
+    widget.stateManager!.resizeColumn(widget.stateManager!.columns[0].key, 0.00001);
 
     // Apply filter to UI
     widget.stateManager!.setFilter((element) {
-      if (!filterIndex.contains(element!.sortIdx)) {
+      // if (!filterIndex.contains(element!.sortIdx)) {
+      if (!filterIndex.contains(element!.key.toString())) {
         return false;
-      } else if (!checkedList.contains(
-          element.cells[currentColumn]!.value.toString())) {
+      } else if (!checkedList.contains(element.cells[currentColumn]!.value.toString())) {
         return false;
       } else {
         return true;
@@ -482,11 +446,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
       filterRows();
     }
 
-    Color textColor = Theme
-        .of(context)
-        .textTheme
-        .bodyText2!
-        .color ?? Colors.black;
+    Color textColor = Theme.of(context).textTheme.bodyText2!.color ?? Colors.black;
 
     return Shortcuts(
       shortcuts: {
@@ -495,10 +455,8 @@ class _ExcelMenuState extends State<ExcelMenu> {
       },
       child: Actions(
         actions: {
-          EnterIntent: CallbackAction<EnterIntent>(
-              onInvoke: (intent) => saveAndClose()),
-          EscapeIntent: CallbackAction<EscapeIntent>(
-              onInvoke: (intent) => Navigator.of(context).pop())
+          EnterIntent: CallbackAction<EnterIntent>(onInvoke: (intent) => saveAndClose()),
+          EscapeIntent: CallbackAction<EscapeIntent>(onInvoke: (intent) => Navigator.of(context).pop())
         },
         child: Focus(
           autofocus: true,
@@ -506,9 +464,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
             width: 600,
             height: 1000,
             // color: Colors.grey[200],
-            color: Theme
-                .of(context)
-                .scaffoldBackgroundColor,
+            color: Theme.of(context).scaffoldBackgroundColor,
             padding: const EdgeInsets.all(12),
             // margin: EdgeInsets.all(5),
             child: Column(
@@ -548,8 +504,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
                                     ),
                                     Text(
                                       'Remove All Filters',
-                                      style: TextStyle(
-                                          fontSize: 16, color: textColor),
+                                      style: TextStyle(fontSize: 16, color: textColor),
                                     ),
                                   ],
                                 ),
@@ -574,8 +529,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
                       ),
                       TextButton(
                           onPressed: () {
-                            widget.stateManager!.hideColumn(widget.column!.key,
-                                true);
+                            widget.stateManager!.hideColumn(widget.column!.key, true);
                             Navigator.of(context).pop();
                           },
                           child: Container(
@@ -591,8 +545,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
                                 ),
                                 Text(
                                   'Hide Column',
-                                  style: TextStyle(
-                                      fontSize: 16, color: textColor),
+                                  style: TextStyle(fontSize: 16, color: textColor),
                                 ),
                               ],
                             ),
@@ -606,8 +559,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
                           height: 50,
                           child: Row(
                             children: [
-                              Icon(
-                                  Icons.view_column_outlined, color: textColor),
+                              Icon(Icons.view_column_outlined, color: textColor),
                               const SizedBox(
                                 width: 20,
                               ),
@@ -620,29 +572,23 @@ class _ExcelMenuState extends State<ExcelMenu> {
                               ),
                             ],
                           ),
-                        ),),
+                        ),
+                      ),
                     ],
                   ),
                 ),
                 const Divider(),
                 Card(
-                  color: Theme
-                      .of(context)
-                      .dialogBackgroundColor,
+                  color: Theme.of(context).dialogBackgroundColor,
                   child: Container(
-                    padding: const EdgeInsets.only(
-                        left: 15, right: 15, bottom: 15),
+                    padding: const EdgeInsets.only(left: 15, right: 15, bottom: 15),
                     child: Column(
                       children: [
                         TextField(
                           controller: containsController,
-                          decoration: const InputDecoration(
-                              labelText: 'Contains'),
-                          keyboardType: columnType.isNumber ? TextInputType
-                              .number : TextInputType.text,
-                          inputFormatters: columnType
-                              .isNumber ? [FilteringTextInputFormatter.allow(
-                              RegExp('[0-9.]'))] : null,
+                          decoration: const InputDecoration(labelText: 'Contains'),
+                          keyboardType: columnType.isNumber ? TextInputType.number : TextInputType.text,
+                          inputFormatters: columnType.isNumber ? [FilteringTextInputFormatter.allow(RegExp('[0-9.]'))] : null,
                           onEditingComplete: () {
                             mainFocusNode.requestFocus();
                           },
@@ -658,13 +604,9 @@ class _ExcelMenuState extends State<ExcelMenu> {
                         if (columnType.isNumber)
                           TextField(
                             controller: greaterController,
-                            decoration: const InputDecoration(
-                                labelText: 'Greater Than'),
+                            decoration: const InputDecoration(labelText: 'Greater Than'),
                             keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(
-                                  RegExp('[0-9.]'))
-                            ],
+                            inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[0-9.]'))],
                             onEditingComplete: () {
                               mainFocusNode.requestFocus();
                             },
@@ -678,13 +620,9 @@ class _ExcelMenuState extends State<ExcelMenu> {
                         if (columnType.isNumber)
                           TextField(
                             controller: lesserController,
-                            decoration: const InputDecoration(
-                                labelText: 'Less Than'),
+                            decoration: const InputDecoration(labelText: 'Less Than'),
                             keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(
-                                  RegExp('[0-9.]'))
-                            ],
+                            inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[0-9.]'))],
                             onEditingComplete: () {
                               mainFocusNode.requestFocus();
                             },
@@ -702,31 +640,21 @@ class _ExcelMenuState extends State<ExcelMenu> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-
                                 Container(
                                   width: 150,
                                   child: columnType.isDate
                                       ? ListTile(
-                                    minLeadingWidth: 0,
-                                    title: Text(
-                                      currentColumn.toLowerCase().contains(
-                                          'start')
-                                          ? 'Started Before'
-                                          : 'Ending Before',
-                                      style: const TextStyle(fontSize: 16),
-                                    ),
-                                    subtitle: Text(formatDate(getUnix(
-                                        isBefore: true,
-                                        isStart: isStart,
-                                        isDelta: false))),
-                                  )
+                                          minLeadingWidth: 0,
+                                          title: Text(
+                                            currentColumn.toLowerCase().contains('start') ? 'Started Before' : 'Ending Before',
+                                            style: const TextStyle(fontSize: 16),
+                                          ),
+                                          subtitle: Text(formatDate(getUnix(isBefore: true, isStart: isStart, isDelta: false))),
+                                        )
                                       : Text(
-                                    currentColumn.toLowerCase().contains(
-                                        'start')
-                                        ? 'Started Before'
-                                        : 'Ending Before',
-                                    style: const TextStyle(fontSize: 16),
-                                  ),
+                                          currentColumn.toLowerCase().contains('start') ? 'Started Before' : 'Ending Before',
+                                          style: const TextStyle(fontSize: 16),
+                                        ),
                                 ),
 
                                 // Container(
@@ -740,11 +668,8 @@ class _ExcelMenuState extends State<ExcelMenu> {
                                   width: 100,
                                   child: TextField(
                                     controller: beforeDayController,
-                                    decoration: const InputDecoration(
-                                        labelText: 'Days'),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly
-                                    ],
+                                    decoration: const InputDecoration(labelText: 'Days'),
+                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                     keyboardType: TextInputType.number,
                                     onEditingComplete: () {
                                       mainFocusNode.requestFocus();
@@ -761,11 +686,8 @@ class _ExcelMenuState extends State<ExcelMenu> {
                                   width: 100,
                                   child: TextField(
                                     controller: beforeHourController,
-                                    decoration: const InputDecoration(
-                                        labelText: 'Hours'),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly
-                                    ],
+                                    decoration: const InputDecoration(labelText: 'Hours'),
+                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                     keyboardType: TextInputType.number,
                                     onEditingComplete: () {
                                       mainFocusNode.requestFocus();
@@ -782,11 +704,8 @@ class _ExcelMenuState extends State<ExcelMenu> {
                                   width: 100,
                                   child: TextField(
                                     controller: beforeMinController,
-                                    decoration: const InputDecoration(
-                                        labelText: 'Minutes'),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly
-                                    ],
+                                    decoration: const InputDecoration(labelText: 'Minutes'),
+                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                     keyboardType: TextInputType.number,
                                     onEditingComplete: () {
                                       mainFocusNode.requestFocus();
@@ -815,36 +734,24 @@ class _ExcelMenuState extends State<ExcelMenu> {
                                   width: 150,
                                   child: columnType.isDate
                                       ? ListTile(
-                                    minLeadingWidth: 0,
-                                    title: Text(
-                                      currentColumn.toLowerCase().contains(
-                                          'start')
-                                          ? 'Started After'
-                                          : 'Ending After',
-                                      style: const TextStyle(fontSize: 16),
-                                    ),
-                                    subtitle: Text(formatDate(getUnix(
-                                        isBefore: false,
-                                        isStart: isStart,
-                                        isDelta: false))),
-                                  )
+                                          minLeadingWidth: 0,
+                                          title: Text(
+                                            currentColumn.toLowerCase().contains('start') ? 'Started After' : 'Ending After',
+                                            style: const TextStyle(fontSize: 16),
+                                          ),
+                                          subtitle: Text(formatDate(getUnix(isBefore: false, isStart: isStart, isDelta: false))),
+                                        )
                                       : Text(
-                                    currentColumn.toLowerCase().contains(
-                                        'start')
-                                        ? 'Started After'
-                                        : 'Ending After',
-                                    style: const TextStyle(fontSize: 16),
-                                  ),
+                                          currentColumn.toLowerCase().contains('start') ? 'Started After' : 'Ending After',
+                                          style: const TextStyle(fontSize: 16),
+                                        ),
                                 ),
                                 Container(
                                   width: 100,
                                   child: TextField(
                                     controller: afterDayController,
-                                    decoration: const InputDecoration(
-                                        labelText: 'Days'),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly
-                                    ],
+                                    decoration: const InputDecoration(labelText: 'Days'),
+                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                     keyboardType: TextInputType.number,
                                     onEditingComplete: () {
                                       mainFocusNode.requestFocus();
@@ -861,11 +768,8 @@ class _ExcelMenuState extends State<ExcelMenu> {
                                   width: 100,
                                   child: TextField(
                                     controller: afterHourController,
-                                    decoration: const InputDecoration(
-                                        labelText: 'Hours'),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly
-                                    ],
+                                    decoration: const InputDecoration(labelText: 'Hours'),
+                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                     keyboardType: TextInputType.number,
                                     onEditingComplete: () {
                                       mainFocusNode.requestFocus();
@@ -882,11 +786,8 @@ class _ExcelMenuState extends State<ExcelMenu> {
                                   width: 100,
                                   child: TextField(
                                     controller: afterMinController,
-                                    decoration: const InputDecoration(
-                                        labelText: 'Minutes'),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly
-                                    ],
+                                    decoration: const InputDecoration(labelText: 'Minutes'),
+                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                     keyboardType: TextInputType.number,
                                     onEditingComplete: () {
                                       mainFocusNode.requestFocus();
@@ -909,78 +810,59 @@ class _ExcelMenuState extends State<ExcelMenu> {
                 const Divider(),
                 Expanded(
                   child: Card(
-                    color: Theme
-                        .of(context)
-                        .dialogBackgroundColor,
+                    color: Theme.of(context).dialogBackgroundColor,
                     child: Container(
                       margin: const EdgeInsets.all(10),
                       // height: columnType.isText ? MediaQuery.of(context).size.height - 446 : MediaQuery.of(context).size.height - 574,
-                      color: Theme
-                          .of(context)
-                          .dialogBackgroundColor,
+                      color: Theme.of(context).dialogBackgroundColor,
                       child: Scrollbar(
                         isAlwaysShown: true,
                         showTrackOnHover: true,
                         child: ListView.builder(
                           itemCount: filterItems.length,
-                          itemBuilder: (context, index) =>
-                              Container(
-                                width: 400,
-                                // height: 30,
-                                child: Column(
-                                  children: [
-                                    CheckboxListTile(
-                                      tristate: filterItems[index] ==
-                                          'Select All' ? true : false,
-                                      activeColor: Theme
-                                          .of(context)
-                                          .brightness == Brightness.dark
-                                          ? Colors.blue
-                                          : null,
-                                      // title: Text(filterItems[index]),
-                                      title: Text(
-                                          filterItems[index] == 'Select All'
-                                              ? 'Select All'
-                                              : widget.column!
-                                              .formattedValueForDisplay(
-                                              filterItems[index])),
-                                      value: filterItems[index] == 'Select All'
-                                          ? getShowAllChecked()
-                                          : checkedList.contains(
-                                          filterItems[index]),
-                                      onChanged: (value) {
-                                        var title = filterItems[index];
-                                        if (title == 'Select All') {
-                                          setState(() {
-                                            // If Select All is in checkedLists
-                                            // Clear check List
-                                            if (checkedList.contains(title)) {
-                                              // then set as true
-                                              checkedList = [];
-                                            } else {
-                                              checkedList = [];
-                                              checkedList.addAll(filterItems);
-                                            }
-                                          });
+                          itemBuilder: (context, index) => Container(
+                            width: 400,
+                            // height: 30,
+                            child: Column(
+                              children: [
+                                CheckboxListTile(
+                                  tristate: filterItems[index] == 'Select All' ? true : false,
+                                  activeColor: Theme.of(context).brightness == Brightness.dark ? Colors.blue : null,
+                                  // title: Text(filterItems[index]),
+                                  title: Text(filterItems[index] == 'Select All' ? 'Select All' : widget.column!.formattedValueForDisplay(filterItems[index])),
+                                  value: filterItems[index] == 'Select All' ? getShowAllChecked() : checkedList.contains(filterItems[index]),
+                                  onChanged: (value) {
+                                    var title = filterItems[index];
+                                    if (title == 'Select All') {
+                                      setState(() {
+                                        // If Select All is in checkedLists
+                                        // Clear check List
+                                        if (checkedList.contains(title)) {
+                                          // then set as true
+                                          checkedList = [];
                                         } else {
-                                          setState(() {
-                                            checked[title] = value!;
-                                            if (value &&
-                                                !checkedList.contains(title)) {
-                                              checkedList.add(title);
-                                            } else {
-                                              checkedList.remove(title);
-                                            }
-                                          });
+                                          checkedList = [];
+                                          checkedList.addAll(filterItems);
                                         }
-                                      },
-                                    ),
-                                    const Divider(
-                                      height: 1,
-                                    ),
-                                  ],
+                                      });
+                                    } else {
+                                      setState(() {
+                                        checked[title] = value!;
+                                        if (value && !checkedList.contains(title)) {
+                                          checkedList.add(title);
+                                        } else {
+                                          checkedList.remove(title);
+                                        }
+                                      });
+                                    }
+                                  },
                                 ),
-                              ),
+                                const Divider(
+                                  height: 1,
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -1002,7 +884,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
                               style: TextStyle(fontSize: 20),
                             ))),
                     Text('${resultCount()} items'),
-
                     ElevatedButton(
                         onPressed: () {
                           saveAndClose();
@@ -1027,8 +908,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
   String resultCount() {
     int count = 0;
     widget.stateManager!.refRows!.forEach((element) {
-      if (filterIndex.contains(element!.sortIdx) && checkedList.contains(
-          element.cells[currentColumn]!.value.toString())) {
+      if (filterIndex.contains(element!.sortIdx) && checkedList.contains(element.cells[currentColumn]!.value.toString())) {
         count++;
       }
     });
