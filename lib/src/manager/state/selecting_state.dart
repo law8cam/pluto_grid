@@ -173,7 +173,7 @@ mixin SelectingState implements IPlutoGridState {
     eventManager!.stateManager!.resizeColumn(eventManager!.stateManager!.columns[0].key, 0.00001);
 
     eventManager!.stateManager!.setFilter((element) {
-      if (!filterIndex.contains(element!.sortIdx)) {
+      if (!filterIndex.contains(element!.key.toString())) {
         return false;
       } else {
         return true;
