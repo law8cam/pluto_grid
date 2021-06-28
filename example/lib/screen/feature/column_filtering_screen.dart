@@ -121,10 +121,11 @@ class _ColumnFilteringScreenState extends State<ColumnFilteringScreen> {
 
         ElevatedButton(onPressed: () {
 
-          // List<String> selected = ['Amber', "Antonio's Pizza", '21 Club', '241 Pizza', 'BOOF'];
+          List<String> selected = ['Amber', "Antonio's Pizza", '21 Club', '241 Pizza', 'BOOF'];
           // stateManager.applyFiltersNew({'text': {'Selected': jsonEncode(selected)}});
+          stateManager.applyFiltersNew({'text': {'Contains': 'a'}});
 
-          stateManager.removeRows([stateManager.rows[0]]);
+          // stateManager.removeRows([stateManager.rows[0]]);
 
           // int index = 0;
           //
