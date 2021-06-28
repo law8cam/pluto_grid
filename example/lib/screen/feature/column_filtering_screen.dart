@@ -121,9 +121,17 @@ class _ColumnFilteringScreenState extends State<ColumnFilteringScreen> {
 
         ElevatedButton(onPressed: () {
 
-          List<String> selected = ['Amber', "Antonio's Pizza", '21 Club', '241 Pizza', 'BOOF'];
+          // List<String> selected = ['Amber', "Antonio's Pizza", '21 Club', '241 Pizza', 'BOOF'];
+          // stateManager.applyFiltersNew({'text': {'Selected': jsonEncode(selected)}});
 
-          stateManager.applyFiltersNew({'text': {'Selected': jsonEncode(selected)}});
+          stateManager.removeRows([stateManager.rows[0]]);
+
+          // int index = 0;
+          //
+          // stateManager.rows.forEach((element) {
+          //   element!.sortIdx = index;
+          //   index++;
+          // });
 
         }, child: const Text('Testing', style: TextStyle(fontSize: 30),))
       ],
@@ -147,12 +155,10 @@ class _ColumnFilteringScreenState extends State<ColumnFilteringScreen> {
             print(event);
           },
           configuration: PlutoGridConfiguration(
-
             scrollbarConfig: const PlutoGridScrollbarConfig(
               isAlwaysShown: true,
               draggableScrollbar: true,
               scrollbarThickness: 8
-
             ),
             /// If columnFilterConfig is not set, the default setting is applied.
             ///

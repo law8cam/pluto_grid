@@ -9,7 +9,12 @@ class ExcelFilters {
     rows = stateManager!.refRows!.originalList;
   }
 
-  List<int> dateFilter({required int filterValue, required List<int> filterIndex, required bool isBefore, bool isFuture = true, String? column}) {
+  PlutoRow? rowFromKey(String key){
+    return rows.firstWhere((element) => element!.key.toString() == key);
+  }
+
+
+  List<String> dateFilter({required int filterValue, required List<String> filterIndex, required bool isBefore, bool isFuture = true, String? column}) {
 
     if(isFuture){
       filterValue = DateTime.now().millisecondsSinceEpoch + filterValue;
@@ -18,7 +23,7 @@ class ExcelFilters {
     }
 
     filterIndex.removeWhere((index) {
-      String element = rows[index]!.cells[column]!.value.toString();
+      String element = rowFromKey(index)!.cells[column]!.value.toString();
       if (element == 'Select All') {
         return false;
       }
@@ -41,11 +46,11 @@ class ExcelFilters {
     return filterIndex;
   }
 
-  List<int> numberFilter({required String filterValue, required List<int> filterIndex, required bool isGreater, String? column}) {
+  List<String> numberFilter({required String filterValue, required List<String> filterIndex, required bool isGreater, String? column}) {
     if (double.tryParse(filterValue) != null) {
       double number = double.parse(filterValue);
       filterIndex.removeWhere((index) {
-        String element = rows[index]!.cells[column]!.value.toString();
+        String element = rowFromKey(index)!.cells[column]!.value.toString();
 
         if (element == 'Select All') {
           return false;
@@ -73,7 +78,7 @@ class ExcelFilters {
     return filterIndex;
   }
 
-  List<int> containsFilter({required String filterValue, required List<int> filterIndex, String? column}) {
+  List<String> containsFilter({required String filterValue, required List<String> filterIndex, String? column}) {
     List<String> filterList = filterValue.split(',');
 
     filterList.removeWhere((element) => element.trim().replaceAll('-', '') == '');
@@ -87,7 +92,7 @@ class ExcelFilters {
     });
 
     filterIndex.removeWhere((index) {
-      String element = rows[index]!.cells[column]!.value.toString();
+      String element = rowFromKey(index)!.cells[column]!.value.toString();
 
       if (element == 'Select All') {
         return false;
@@ -172,9 +177,10 @@ class ExcelFilters {
     return itemsToFilter;
   }
 
-  List<int> equalsFilter({required List<String> filterList, required List<int> filterIndex, String? column}) {
+  List<String> equalsFilter({required List<String> filterList, required List<String> filterIndex, String? column}) {
     filterIndex.removeWhere((index) {
-      String element = rows[index]!.cells[column]!.value.toString();
+      String element = rowFromKey(index)!.cells[column]!.value.toString();
+
       if (element == 'Select All') {
         return false;
       }
