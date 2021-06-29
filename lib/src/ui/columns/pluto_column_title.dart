@@ -418,23 +418,29 @@ class __ColumnTextWidgetState extends __ColumnTextWidgetStateWithChange {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Flexible(
-            child: Text(
-              widget.column!.title,
-              style: widget.stateManager.configuration!.columnTextStyle,
-              maxLines: 2,
-              softWrap: true,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Text(
+                widget.column!.title,
+                style: widget.stateManager.configuration!.columnTextStyle,
+                maxLines: 2,
+                softWrap: true,
+              ),
             ),
           ),
           if (isFilteredList! || widget.stateManager.filtersNewColumns.contains(widget.column!.field))
-            IconButton(
-              icon: Icon(
-                Icons.filter_alt_outlined,
-                color: widget.stateManager.configuration!.iconColor,
-                size: widget.stateManager.configuration!.iconSize,
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: IconButton(
+                icon: Icon(
+                  Icons.filter_alt_outlined,
+                  color: widget.stateManager.configuration!.iconColor,
+                  size: widget.stateManager.configuration!.iconSize,
+                ),
+                onPressed: handleOnPressedFilter,
               ),
-              onPressed: handleOnPressedFilter,
             ),
-          const SizedBox(width: 5),
+          // const SizedBox(width: 8),
         ],
       ),
     );
