@@ -262,7 +262,10 @@ class _BuildColumnWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: column!.width,
+
+      // todo: Changed header height
       height: PlutoGridSettings.rowHeight,
+      // height: 100,
       padding: const EdgeInsets.symmetric(horizontal: PlutoGridSettings.cellPadding),
       decoration: stateManager!.configuration!.enableColumnBorder
           ? BoxDecoration(
@@ -429,7 +432,9 @@ class __ColumnTextWidgetState extends __ColumnTextWidgetStateWithChange {
       style: widget.stateManager.configuration!.columnTextStyle,
       overflow: TextOverflow.ellipsis,
       softWrap: false,
-      maxLines: 1,
+
+      // todo: Changed
+      maxLines: 2,
     );
   }
 }
