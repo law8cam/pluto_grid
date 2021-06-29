@@ -411,12 +411,41 @@ abstract class __ColumnTextWidgetStateWithChange extends PlutoStateWithChange<_C
 class __ColumnTextWidgetState extends __ColumnTextWidgetStateWithChange {
   @override
   Widget build(BuildContext context) {
+    return Container(
+      // width: 50,
+      // height: 50,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Flexible(
+            child: Text(
+              widget.column!.title,
+              style: widget.stateManager.configuration!.columnTextStyle,
+              maxLines: 2,
+              softWrap: true,
+            ),
+          ),
+          if (isFilteredList! || widget.stateManager.filtersNewColumns.contains(widget.column!.field))
+            IconButton(
+              icon: Icon(
+                Icons.filter_alt_outlined,
+                color: widget.stateManager.configuration!.iconColor,
+                size: widget.stateManager.configuration!.iconSize,
+              ),
+              onPressed: handleOnPressedFilter,
+            ),
+          const SizedBox(width: 5),
+        ],
+      ),
+    );
+
     return Text.rich(
       TextSpan(
         text: widget.column!.title,
         children: [
           if (isFilteredList! || widget.stateManager.filtersNewColumns.contains(widget.column!.field))
             WidgetSpan(
+              // alignment: PlaceholderAlignment.middle,
               alignment: PlaceholderAlignment.middle,
               child: IconButton(
                 icon: Icon(

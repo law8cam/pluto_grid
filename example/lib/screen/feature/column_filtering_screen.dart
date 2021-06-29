@@ -30,7 +30,7 @@ class _ColumnFilteringScreenState extends State<ColumnFilteringScreen> {
 
     columns = [
       PlutoColumn(
-        title: 'Text With\nLong Header',
+        title: 'Text With Long Header',
         field: 'text',
         type: PlutoColumnType.text(),
       ),
