@@ -144,25 +144,25 @@ mixin SelectingState implements IPlutoGridState {
         }
       });
 
-      bool isStart = column.toLowerCase().contains('start');
+      bool isFuture = column.toLowerCase().contains('end');
 
       if (beforeUnix != 0) {
         filterIndex = excelFilters.dateFilter(
-          filterValue: beforeUnix + DateTime.now().millisecondsSinceEpoch,
+          filterValue: beforeUnix,
           filterIndex: filterIndex,
           isBefore: true,
           column: column,
-          isFuture: isStart,
+          isFuture: isFuture,
         );
       }
 
       if (afterUnix != 0) {
         filterIndex = excelFilters.dateFilter(
-          filterValue: afterUnix + DateTime.now().millisecondsSinceEpoch,
+          filterValue: afterUnix,
           filterIndex: filterIndex,
           isBefore: false,
           column: column,
-          isFuture: isStart,
+          isFuture: isFuture,
         );
       }
     });

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:intl/intl.dart';
 
-
 import '../../dummy_data/development.dart';
 import '../../widget/pluto_example_button.dart';
 import '../../widget/pluto_example_screen.dart';
@@ -110,38 +109,49 @@ class _ColumnFilteringScreenState extends State<ColumnFilteringScreen> {
       // ],
       topButtons: [
         PlutoExampleButton(
-          url:
-              'https://github.com/bosskmk/pluto_grid/blob/master/example/lib/screen/feature/column_filtering_screen.dart',
+          url: 'https://github.com/bosskmk/pluto_grid/blob/master/example/lib/screen/feature/column_filtering_screen.dart',
         ),
         const SizedBox(width: 50),
-        TextField(onChanged: (value) {setState(() {
-
-        });},),
+        TextField(
+          onChanged: (value) {
+            setState(() {});
+          },
+        ),
         const SizedBox(width: 50),
+        ElevatedButton(
+            onPressed: () {
+              //{end date: {BeforeDay: 100, AfterDay: 8}}
 
-        ElevatedButton(onPressed: () {
+              var filterData = {
+                'end date': {'BeforeDay': '300', 'AfterDay': '1'}
+              };
+              stateManager.applyFiltersNew(filterData);
 
-          List<String> selected = ['Amber', "Antonio's Pizza", '21 Club', '241 Pizza', 'BOOF'];
-          // stateManager.applyFiltersNew({'text': {'Selected': jsonEncode(selected)}});
-          stateManager.applyFiltersNew({'text': {'Contains': 'a'}});
+              // List<String> selected = ['Amber', "Antonio's Pizza", '21 Club', '241 Pizza', 'BOOF'];
+              // // stateManager.applyFiltersNew({'text': {'Selected': jsonEncode(selected)}});
+              // stateManager.applyFiltersNew({
+              //   'text': {'Contains': 'a'}
+              // });
 
-          // stateManager.removeRows([stateManager.rows[0]]);
+              // stateManager.removeRows([stateManager.rows[0]]);
 
-          // int index = 0;
-          //
-          // stateManager.rows.forEach((element) {
-          //   element!.sortIdx = index;
-          //   index++;
-          // });
-
-        }, child: const Text('Testing', style: TextStyle(fontSize: 30),))
+              // int index = 0;
+              //
+              // stateManager.rows.forEach((element) {
+              //   element!.sortIdx = index;
+              //   index++;
+              // });
+            },
+            child: const Text(
+              'Testing',
+              style: TextStyle(fontSize: 30),
+            ))
       ],
       body: Container(
         child: PlutoGrid(
           columns: columns,
           rows: rows,
           onLoaded: (PlutoGridOnLoadedEvent event) {
-
             stateManager = event.stateManager!;
             stateManager.addListener(() {
               // print('State Listener');
@@ -150,17 +160,13 @@ class _ColumnFilteringScreenState extends State<ColumnFilteringScreen> {
             stateManager.eventManager!.listener((event) {
               // print('Event Listener');
             });
-
           },
           onChanged: (PlutoGridOnChangedEvent event) {
             print(event);
           },
           configuration: PlutoGridConfiguration(
-            scrollbarConfig: const PlutoGridScrollbarConfig(
-              isAlwaysShown: true,
-              draggableScrollbar: true,
-              scrollbarThickness: 8
-            ),
+            scrollbarConfig: const PlutoGridScrollbarConfig(isAlwaysShown: true, draggableScrollbar: true, scrollbarThickness: 8),
+
             /// If columnFilterConfig is not set, the default setting is applied.
             ///
             /// Return the value returned by resolveDefaultColumnFilter through the resolver function.
