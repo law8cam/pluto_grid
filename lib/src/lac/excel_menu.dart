@@ -407,6 +407,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
 
   void saveAndClose() {
     Map<String, Map<String, String>> newData = saveFilter();
+    print(newData);
     widget.stateManager!.setFiltersNewColumns(newData.keys.toList());
 
     // Resize to trigger column filter icon
