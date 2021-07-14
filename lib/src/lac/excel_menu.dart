@@ -54,8 +54,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
 
   FocusNode mainFocusNode = FocusNode();
 
-  // Map<String, dynamic> filterData = <String, dynamic> {'Text': {'Contains': 'Baik'}};
-
   late String currentColumn = widget.column!.field;
   late bool isStart = currentColumn.toLowerCase().contains('start');
 
@@ -235,7 +233,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
 
   String formatDate(int unix) {
     if (unix == 0) {
-      return "";
+      return '';
     }
     String date = DateTime.fromMillisecondsSinceEpoch(unix).toString();
     String formatted = widget.column!.formattedValueForDisplay(date);
@@ -909,7 +907,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
   String resultCount() {
     int count = 0;
     widget.stateManager!.refRows!.forEach((element) {
-      if (filterIndex.contains(element!.sortIdx) && checkedList.contains(element.cells[currentColumn]!.value.toString())) {
+      if (filterIndex.contains(element!.key.toString()) && checkedList.contains(element.cells[currentColumn]!.value.toString())) {
         count++;
       }
     });
