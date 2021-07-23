@@ -458,7 +458,11 @@ class _ExcelMenuState extends State<ExcelMenu> {
 
     filterItemsFormatted = [];
     filterItems.forEach((element) {
-      filterItemsFormatted.add(widget.column!.formattedValueForDisplay(element));
+      if(element == 'Select All'){
+        filterItemsFormatted.add('Select All');
+      }else{
+        filterItemsFormatted.add(widget.column!.formattedValueForDisplay(element));
+      }
     });
 
     Color textColor = Theme.of(context).textTheme.bodyText2!.color ?? Colors.black;
