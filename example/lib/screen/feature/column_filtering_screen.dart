@@ -48,10 +48,22 @@ class _ColumnFilteringScreenState extends State<ColumnFilteringScreen> {
         // type: PlutoColumnType.date(format: 'dd-MMM-yy',),
         type: PlutoColumnType.date(),
         formatter: (dynamic v) {
-          DateTime date = DateTime.parse(v.toString());
-          DateFormat format = DateFormat('dd-MMM-yy');
-          String dateString = format.format(date);
-          return dateString;
+          String output = v.toString();
+
+          try {
+            DateTime date = DateTime.parse(v.toString());
+            DateFormat format = DateFormat('dd-MMM-yy');
+            String dateString = format.format(date);
+
+            if (date.millisecondsSinceEpoch > DateTime.now().millisecondsSinceEpoch) {
+              output = 'Future';
+            } else {
+              output = 'Past';
+            }
+          } catch (e) {
+            var bla = e;
+          }
+          return output;
         },
       ),
       PlutoColumn(

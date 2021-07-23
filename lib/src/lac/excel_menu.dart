@@ -33,6 +33,7 @@ class ExcelMenu extends StatefulWidget {
 
 class _ExcelMenuState extends State<ExcelMenu> {
   List<String> filterItems = [];
+  List<String> filterItemsFormatted = [];
   List<String> filterIndex = [];
   late ExcelFilters excelFilters = ExcelFilters(stateManager: widget.stateManager!);
 
@@ -208,6 +209,17 @@ class _ExcelMenuState extends State<ExcelMenu> {
     }
 
     filterItems = [];
+
+    // Map<String, String> formattedMap = <String, String> {};
+    // filterIndex.forEach((index) {
+    //   PlutoRow? row = excelFilters.rowFromKey(index);
+    //   var rowValue = row!.cells[currentColumn]!.value.toString();
+    //   var rowFormatted = widget.column!.formattedValueForDisplay(rowValue);
+    //   formattedMap.putIfAbsent(rowFormatted, () => rowValue);
+    //
+    //   // filterItems.add(row!.cells[currentColumn]!.value.toString());
+    // });
+    // filterItems += formattedMap.values.toList();
 
     filterIndex.forEach((index) {
       PlutoRow? row = excelFilters.rowFromKey(index);
@@ -405,7 +417,6 @@ class _ExcelMenuState extends State<ExcelMenu> {
 
   void saveAndClose() {
     Map<String, Map<String, String>> newData = saveFilter();
-    print(newData);
     widget.stateManager!.setFiltersNewColumns(newData.keys.toList());
 
     // Resize to trigger column filter icon
@@ -444,6 +455,11 @@ class _ExcelMenuState extends State<ExcelMenu> {
     if (filterItems.isEmpty) {
       filterRows();
     }
+
+    filterItemsFormatted = [];
+    filterItems.forEach((element) {
+      filterItemsFormatted.add(widget.column!.formattedValueForDisplay(element));
+    });
 
     Color textColor = Theme.of(context).textTheme.bodyText2!.color ?? Colors.black;
 
@@ -819,49 +835,81 @@ class _ExcelMenuState extends State<ExcelMenu> {
                         showTrackOnHover: true,
                         child: ListView.builder(
                           itemCount: filterItems.length,
-                          itemBuilder: (context, index) => Container(
-                            width: 400,
-                            // height: 30,
-                            child: Column(
-                              children: [
-                                CheckboxListTile(
-                                  tristate: filterItems[index] == 'Select All' ? true : false,
-                                  activeColor: Theme.of(context).brightness == Brightness.dark ? Colors.blue : null,
-                                  // title: Text(filterItems[index]),
-                                  title: Text(filterItems[index] == 'Select All' ? 'Select All' : widget.column!.formattedValueForDisplay(filterItems[index])),
-                                  value: filterItems[index] == 'Select All' ? getShowAllChecked() : checkedList.contains(filterItems[index]),
-                                  onChanged: (value) {
-                                    var title = filterItems[index];
-                                    if (title == 'Select All') {
-                                      setState(() {
-                                        // If Select All is in checkedLists
-                                        // Clear check List
-                                        if (checkedList.contains(title)) {
-                                          // then set as true
-                                          checkedList = [];
-                                        } else {
-                                          checkedList = [];
-                                          checkedList.addAll(filterItems);
-                                        }
-                                      });
-                                    } else {
-                                      setState(() {
-                                        checked[title] = value!;
-                                        if (value && !checkedList.contains(title)) {
-                                          checkedList.add(title);
-                                        } else {
-                                          checkedList.remove(title);
-                                        }
-                                      });
-                                    }
-                                  },
+                          itemBuilder: (context, index) {
+
+                            // Hide row?
+                            // If formatted row has already been added then hide
+                            bool showRow = true;
+                            var formattedValue = widget.column!.formattedValueForDisplay(filterItems[index]);
+                            if(index != 0 && filterItemsFormatted.sublist(0,index).contains(formattedValue)){
+                              showRow = false;
+                            }
+                            // print(showRow);
+                            return Visibility(
+                              visible: showRow,
+                              child: Container(
+                                width: 400,
+                                // height: 30,
+                                child: Column(
+                                  children: [
+                                    const Divider(
+                                      height: 1,
+                                    ),
+                                    Visibility(
+                                      child: CheckboxListTile(
+                                        tristate: filterItems[index] == 'Select All' ? true : false,
+                                        activeColor: Theme.of(context).brightness == Brightness.dark ? Colors.blue : null,
+                                        // title: Text(filterItems[index]),
+                                        title: Text(filterItems[index] == 'Select All' ? 'Select All' : widget.column!.formattedValueForDisplay(filterItems[index])),
+                                        value: filterItems[index] == 'Select All' ? getShowAllChecked() : checkedList.contains(filterItems[index]),
+                                        onChanged: (value) {
+                                          var title = filterItems[index];
+                                          if (title == 'Select All') {
+                                            setState(() {
+                                              // If Select All is in checkedLists
+                                              // Clear check List
+                                              if (checkedList.contains(title)) {
+                                                // then set as true
+                                                checkedList = [];
+                                              } else {
+                                                checkedList = [];
+                                                checkedList.addAll(filterItems);
+                                              }
+                                            });
+                                          } else {
+                                            setState(() {
+
+                                              // Get title of all that match formatted
+                                              var formattedValue = widget.column!.formattedValueForDisplay(title);
+                                              filterItems.forEach((element) {
+                                                var elementFormattedValue = widget.column!.formattedValueForDisplay(element);
+                                                if(formattedValue == elementFormattedValue){
+                                                  checked[element] = value!;
+                                                  if (value && !checkedList.contains(element)) {
+                                                    checkedList.add(element);
+                                                  } else {
+                                                    checkedList.remove(element);
+                                                  }
+                                                }
+                                              });
+
+
+                                              // checked[title] = value!;
+                                              // if (value && !checkedList.contains(title)) {
+                                              //   checkedList.add(title);
+                                              // } else {
+                                              //   checkedList.remove(title);
+                                              // }
+                                            });
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const Divider(
-                                  height: 1,
-                                ),
-                              ],
-                            ),
-                          ),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ),
