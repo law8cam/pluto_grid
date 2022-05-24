@@ -47,11 +47,11 @@ class _ColumnFilteringScreenState extends State<ColumnFilteringScreen> {
         field: 'start date',
         // type: PlutoColumnType.date(format: 'dd-MMM-yy',),
         type: PlutoColumnType.date(),
-        formatter: (dynamic v) {
-          String output = v.toString();
+        renderer: (rendererContext) {
+          String output = rendererContext.cell!.value.toString();
 
           try {
-            DateTime date = DateTime.parse(v.toString());
+            DateTime date = DateTime.parse(output);
             DateFormat format = DateFormat('dd-MMM-yy');
             String dateString = format.format(date);
 
@@ -63,8 +63,26 @@ class _ColumnFilteringScreenState extends State<ColumnFilteringScreen> {
           } catch (e) {
             var bla = e;
           }
-          return output;
+          return Text(output);
         },
+        // formatter: (dynamic v) {
+        //   String output = v.toString();
+        //
+        //   try {
+        //     DateTime date = DateTime.parse(v.toString());
+        //     DateFormat format = DateFormat('dd-MMM-yy');
+        //     String dateString = format.format(date);
+        //
+        //     if (date.millisecondsSinceEpoch > DateTime.now().millisecondsSinceEpoch) {
+        //       output = 'Future';
+        //     } else {
+        //       output = 'Past';
+        //     }
+        //   } catch (e) {
+        //     var bla = e;
+        //   }
+        //   return output;
+        // },
       ),
       PlutoColumn(
         title: 'End Date',
