@@ -8,7 +8,6 @@ import '../../pluto_grid.dart';
 import 'excel_event.dart';
 
 class EnterIntent extends Intent {}
-
 class EscapeIntent extends Intent {}
 
 enum FilterType {
@@ -845,6 +844,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
                             // If formatted row has already been added then hide
                             bool showRow = true;
                             var formattedValue = widget.column!.formattedValueForDisplay(filterItems[index]);
+                            // var formattedValue = widget.column!.renderer();
                             if(index != 0 && filterItemsFormatted.sublist(0,index).contains(formattedValue)){
                               showRow = false;
                             }
@@ -865,6 +865,7 @@ class _ExcelMenuState extends State<ExcelMenu> {
                                         activeColor: Theme.of(context).brightness == Brightness.dark ? Colors.blue : null,
                                         // title: Text(filterItems[index]),
                                         title: Text(filterItems[index] == 'Select All' ? 'Select All' : widget.column!.formattedValueForDisplay(filterItems[index])),
+                                        // title: Text(filterItems[index] == 'Select All' ? 'Select All' : widget.column!.rend,
                                         value: filterItems[index] == 'Select All' ? getShowAllChecked() : checkedList.contains(filterItems[index]),
                                         onChanged: (value) {
                                           var title = filterItems[index];
